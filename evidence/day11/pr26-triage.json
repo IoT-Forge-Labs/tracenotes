@@ -1,0 +1,2 @@
+{"results":{"69b1fa82-ffd4-48c9-ad2c-f6b47de6d2bf":{"status":"dismissed","reconciled":true,"failed_effects":[],"retryable":false,"reason":"false_positive","explanation":"Human decision Nov 16: in JavaScript, $ without the m flag matches only at the end of input (/a$/.test('a\\n') is false). Remotes ending in two newlines (\\n\\n and \\r\\n\\r\\n) are rejected with RangeError; the test 'removes one trailing \\n or \\r\\n and nothing else' passes locally and on CI (Ubuntu, Windows). Same mix-up as PR 14.","detail":null}}}
+  trace e0feeb536e9a654f361ccf70fcff2d48
