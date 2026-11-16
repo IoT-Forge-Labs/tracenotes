@@ -1,13 +1,15 @@
-import { describe, test } from 'node:test';
+import { after, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { main } from '../src/cli.ts';
 
 // These tests run the CLI as a real child process, which is the only way to
-// cover the "invoked directly" entry check across platforms. No network, no git.
+// cover the "invoked directly" entry check across platforms. No network; git runs only in the
+// throwaway repositories of the T-010 block at the end, never against this repository.
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cliPath = path.join(repoRoot, 'src', 'cli.ts');
 
@@ -188,7 +190,7 @@ describe('cli', () => {
   });
 
   test('usage documents --format', () => {
-    assert.match(runCli(['--help']).stdout, /tracenotes render \[--repo-url <url>\] \[--format markdown\|json\]/);
+    assert.match(runCli(['--help']).stdout, /tracenotes render \[--repo-url <url> \| --origin\] \[--format markdown\|json\]/);
   });
 
   test('render with empty stdin exits 2', () => {
@@ -367,7 +369,7 @@ describe('cli --config', () => {
   test('usage documents --config on group, render and version', () => {
     const usage = runCli(['--help']).stdout;
     assert.match(usage, /tracenotes group \[--config <path>\]/);
-    assert.match(usage, /tracenotes render \[--repo-url <url>\] \[--format markdown\|json\] \[--config <path>\]/);
+    assert.match(usage, /tracenotes render \[--repo-url <url> \| --origin\] \[--format markdown\|json\] \[--config <path>\]/);
     assert.match(usage, /tracenotes version --current <x\.y\.z> \[--config <path>\]/);
     assert.match(usage, /No config file is read unless --config is given/);
   });
@@ -546,5 +548,194 @@ describe('cli --config with an injected reader', () => {
     assert.equal(parsed.code, 2);
     assert.ok(parsed.err.startsWith(`error: config ${shown}: invalid config: `), parsed.err);
     assert.doesNotMatch(parsed.err, /[\u007f-\u009f\u2028\u2029]/);
+  });
+});
+
+// T-010: --origin, with the origin reader injected (criteria 6 to 9).
+describe('cli render --origin with an injected reader', () => {
+  const stream = readFileSync(path.join(repoRoot, 'tests', 'fixtures', 'log-basic.bin'), 'utf8');
+  const url = 'https://github.com/UBayouski/tracenotes';
+  const failRead = async (): Promise<string> => { throw new Error('stdin must not be read'); };
+  const noOrigin = (): string => { throw new Error('git must not be run'); };
+
+  async function run(argv: string[], readOrigin: () => string, readStdin = async () => stream) {
+    let out = '';
+    let err = '';
+    const code = await main(argv, {
+      stdinIsTTY: false,
+      readStdin,
+      readOrigin,
+      stdout: text => { out += text; },
+      stderr: text => { err += text; },
+    });
+    return { code, out, err };
+  }
+
+  test('renders exactly as --repo-url would, in Markdown and JSON (criterion 6)', async () => {
+    const origin = () => 'git@github.com:UBayouski/tracenotes.git\n';
+    for (const format of ['markdown', 'json']) {
+      const viaOrigin = await run(['render', '--origin', '--format', format], origin);
+      const viaUrl = await run(['render', '--repo-url', url, '--format', format], noOrigin);
+      assert.equal(viaOrigin.code, 0, viaOrigin.err);
+      assert.equal(viaOrigin.err, '');
+      assert.equal(viaOrigin.out, viaUrl.out);
+    }
+  });
+
+  test('credentials in the remote never reach stdout', async () => {
+    const { code, out } = await run(['render', '--origin'], () => 'https://x-access-token:ghs_SECRET@github.com/UBayouski/tracenotes.git\n');
+    assert.equal(code, 0);
+    assert.ok(out.includes(`[#1](${url}/pull/1)`));
+    assert.ok(!out.includes('SECRET'));
+  });
+
+  test('--origin with --repo-url is a usage error in either order, nothing read (criterion 7)', async () => {
+    for (const argv of [['render', '--origin', '--repo-url', url], ['render', '--repo-url', url, '--origin']]) {
+      const { code, out, err } = await run(argv, noOrigin, failRead);
+      assert.equal(code, 2, argv.join(' '));
+      assert.equal(out, '');
+      assert.equal(err, 'error: --origin and --repo-url cannot be used together\n');
+    }
+  });
+
+  test('a repeated --origin is allowed and reads the remote once', async () => {
+    let calls = 0;
+    const { code } = await run(['render', '--origin', '--origin'], () => { calls++; return `${url}.git\n`; });
+    assert.equal(code, 0);
+    assert.equal(calls, 1);
+  });
+
+  test('the remote is read after the options are checked and before stdin (criterion 6)', async () => {
+    const order: string[] = [];
+    const bad = await run(['render', '--origin', '--format', 'yaml'], () => { order.push('origin'); return url; }, failRead);
+    assert.equal(bad.code, 2);
+    assert.equal(order.length, 0);
+    const ok = await run(['render', '--origin'], () => { order.push('origin'); return url; }, async () => { order.push('stdin'); return stream; });
+    assert.equal(ok.code, 0, ok.err);
+    assert.deepEqual(order, ['origin', 'stdin']);
+  });
+
+  test('a failed read exits 2 with one line and never echoes git output (criterion 8)', async () => {
+    const failing = (): string => { throw new Error('fatal: no such remote origin https://u:SECRET@h/o/r'); };
+    const { code, out, err } = await run(['render', '--origin'], failing, failRead);
+    assert.equal(code, 2);
+    assert.equal(out, '');
+    assert.equal(err, 'error: cannot read the origin remote (git not installed, not a git repository, or no origin remote)\n');
+  });
+
+  test('a rejected remote exits 2 with one line and no part of the remote (criterion 8)', async () => {
+    const { code, out, err } = await run(['render', '--origin'], () => 'https://u:SECRET@github.com/o/r/x.git\n', failRead);
+    assert.equal(code, 2);
+    assert.equal(out, '');
+    assert.equal(err.split('\n').length, 2, err);
+    assert.match(err, /^error: origin remote: /);
+    assert.ok(!err.includes('SECRET') && !err.includes('github.com'), err);
+  });
+
+  test('git is never run without --origin (criterion 8)', async () => {
+    for (const argv of [['render'], ['render', '--repo-url', url], ['render', '--format', 'json'], ['group'], ['log']]) {
+      const { code } = await run(argv, noOrigin);
+      assert.equal(code, 0, argv.join(' '));
+    }
+  });
+});
+
+// T-010 criterion 9: the real reader, in throwaway repositories under the OS temp directory.
+// No test runs git against this repository: GIT_CEILING_DIRECTORIES stops the search at the temp dir.
+describe('cli render --origin as a child process', () => {
+  const stream = readFileSync(path.join(repoRoot, 'tests', 'fixtures', 'log-basic.bin'), 'utf8');
+  const base = mkdtempSync(path.join(os.tmpdir(), 'tracenotes-t010-'));
+  // Environment for git and the CLI, built from `source` (the test process's own by default):
+  // every inherited GIT_* variable is dropped (GIT_DIR, GIT_WORK_TREE, GIT_INDEX_FILE,
+  // GIT_CONFIG_* and the rest can redirect git to another repository), then the ceiling is set.
+  const isolatedGitEnv = (source: NodeJS.ProcessEnv): NodeJS.ProcessEnv => ({
+    ...Object.fromEntries(Object.entries(source).filter(([name]) => !name.toUpperCase().startsWith('GIT_'))),
+    GIT_CEILING_DIRECTORIES: base,
+  });
+  const env = isolatedGitEnv(process.env);
+  const git = (cwd: string, ...args: string[]) => {
+    const result = spawnSync('git', args, { cwd, env, encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr);
+  };
+  const runIn = (cwd: string, args: string[], runEnv = env) => {
+    const result = spawnSync(process.execPath, [cliPath, ...args], { cwd, env: runEnv, encoding: 'utf8', input: stream });
+    return { code: result.status, stdout: result.stdout, stderr: result.stderr };
+  };
+  after(() => rmSync(base, { recursive: true, force: true }));
+
+  // Qodo local review finding c72af242: under a git hook (or `git rebase -x`) GIT_DIR and friends
+  // are set and would point git at the repository running the tests. A decoy repository stands
+  // in for it here, so the reproduction never touches the real one.
+  test('ignores GIT_DIR, GIT_WORK_TREE and GIT_CONFIG_* inherited from the caller', () => {
+    const decoy = path.join(base, 'decoy');
+    mkdirSync(decoy);
+    git(decoy, 'init', '-q');
+    git(decoy, 'remote', 'add', 'origin', 'https://github.com/decoy/wrong.git');
+    const repo = path.join(base, 'hooked');
+    mkdirSync(repo);
+    git(repo, 'init', '-q');
+    git(repo, 'remote', 'add', 'origin', 'git@github.com:UBayouski/tracenotes.git');
+    const hostile = isolatedGitEnv({
+      ...process.env,
+      GIT_DIR: path.join(decoy, '.git'),
+      GIT_WORK_TREE: decoy,
+      GIT_CONFIG_COUNT: '1',
+      GIT_CONFIG_KEY_0: 'remote.origin.url',
+      GIT_CONFIG_VALUE_0: 'https://github.com/config/wrong.git',
+    });
+    const { code, stdout, stderr } = runIn(repo, ['render', '--origin'], hostile);
+    assert.equal(code, 0, stderr);
+    assert.ok(stdout.includes('[#1](https://github.com/UBayouski/tracenotes/pull/1)'), stdout);
+    assert.ok(!stdout.includes('wrong'), stdout);
+  });
+
+  test('builds links from the origin of the current repository, without its credentials', () => {
+    const repo = path.join(base, 'with-origin');
+    mkdirSync(repo);
+    git(repo, 'init', '-q');
+    git(repo, 'remote', 'add', 'origin', 'https://ci:SECRET@github.com/UBayouski/tracenotes.git');
+    const { code, stdout, stderr } = runIn(repo, ['render', '--origin']);
+    assert.equal(code, 0, stderr);
+    assert.ok(stdout.includes('[#1](https://github.com/UBayouski/tracenotes/pull/1)'));
+    assert.ok(!stdout.includes('SECRET'));
+  });
+
+  test('a repository without an origin remote exits 2 with one error line', () => {
+    const repo = path.join(base, 'no-origin');
+    mkdirSync(repo);
+    git(repo, 'init', '-q');
+    const { code, stdout, stderr } = runIn(repo, ['render', '--origin']);
+    assert.equal(code, 2);
+    assert.equal(stdout, '');
+    assert.match(stderr, /^error: cannot read the origin remote \(.*\)\n$/);
+  });
+
+  // Qodo local review finding 062cc9f6: a remote.origin.url in the user's own git config would
+  // give the throwaway repository an origin. A fake home directory stands in for the user's.
+  test('ignores remote.origin.url in the caller\'s global git config', () => {
+    const home = path.join(base, 'home');
+    mkdirSync(home);
+    writeFileSync(path.join(home, '.gitconfig'), '[remote "origin"]\n\turl = https://github.com/home/wrong.git\n');
+    const hostile = isolatedGitEnv({ ...process.env, HOME: home, USERPROFILE: home, XDG_CONFIG_HOME: home });
+    const repo = path.join(base, 'no-origin-home');
+    mkdirSync(repo);
+    git(repo, 'init', '-q');
+    const { code, stdout, stderr } = runIn(repo, ['render', '--origin'], hostile);
+    assert.equal(code, 2, stdout);
+    assert.equal(stdout, '');
+    assert.match(stderr, /^error: cannot read the origin remote \(.*\)\n$/);
+  });
+
+  test('a directory that is not a repository exits 2 with one error line', () => {
+    const dir = path.join(base, 'not-a-repo');
+    mkdirSync(dir);
+    const { code, stdout, stderr } = runIn(dir, ['render', '--origin']);
+    assert.equal(code, 2);
+    assert.equal(stdout, '');
+    assert.match(stderr, /^error: cannot read the origin remote \(.*\)\n$/);
+  });
+
+  test('usage documents --origin', () => {
+    assert.match(runIn(base, ['--help']).stdout, /tracenotes render \[--repo-url <url> \| --origin\] \[--format markdown\|json\] \[--config <path>\]/);
   });
 });

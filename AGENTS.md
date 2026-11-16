@@ -67,12 +67,13 @@ repository or make an HTTP request.
 A parser checks a field on the raw text it received, then normalizes. The only changes allowed
 before validation are documented framing: the record separator, the newline git prints after a
 record, a leading byte order mark, `\r\n` to `\n` line-ending normalization, trailing whitespace
-at the end of a line, and blank lines at the start or end of a whole message. Never `.trim()`
+at the end of a line, blank lines at the start or end of a whole message, and, in a git remote
+(`src/remote.ts`), a single `.git` suffix and the userinfo before `@`. Never `.trim()`
 or strip a field and then validate what is left, and never let normalization turn an invalid
 value into a valid-looking one. A new kind of framing is added to this list, with a test, before
 a parser removes it.
-- Applies to: `src/commit.ts`, `src/gitlog.ts`, and every future parser of commit messages, git
-  output, config files, or MCP tool input.
+- Applies to: `src/commit.ts`, `src/gitlog.ts`, `src/remote.ts`, and every future parser of commit
+  messages, git output, config files, or MCP tool input.
 - Why: three of the first nine review findings were this one mistake. A scope of `( )` was trimmed
   to empty and accepted (PR 1). A paragraph `.trim()` deleted the indentation of a code block
   (PR 1). All leading whitespace was stripped before the SHA check, so junk before the hash

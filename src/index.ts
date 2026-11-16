@@ -8,5 +8,6 @@ export { parseConfig } from './config.ts';
 export type { Config } from './config.ts';
 export { renderMarkdown, renderJson, notesDocument } from './render.ts';
 export type { RenderOptions, NotesDocument, NotesSection, NotesEntry, NotesSource, NotesCounts } from './render.ts';
+export { repoUrlFromRemote } from './remote.ts';
 export { recommendVersion, parseVersion } from './version.ts';
 export type { Bump, RuleId, VersionTrigger, VersionRecommendation } from './version.ts';
