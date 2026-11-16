@@ -1,7 +1,7 @@
 import { after, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -647,10 +647,14 @@ describe('cli render --origin as a child process', () => {
   const base = mkdtempSync(path.join(os.tmpdir(), 'tracenotes-t010-'));
   // Environment for git and the CLI, built from `source` (the test process's own by default):
   // every inherited GIT_* variable is dropped (GIT_DIR, GIT_WORK_TREE, GIT_INDEX_FILE,
-  // GIT_CONFIG_* and the rest can redirect git to another repository), then the ceiling is set.
+  // GIT_CONFIG_* and the rest can redirect git to another repository), then the ceiling is set
+  // and the caller's global and system git config are replaced by none (a url.<base>.insteadOf
+  // rule there changes what `git remote get-url` prints, Qodo PR review finding cb45117f).
   const isolatedGitEnv = (source: NodeJS.ProcessEnv): NodeJS.ProcessEnv => ({
     ...Object.fromEntries(Object.entries(source).filter(([name]) => !name.toUpperCase().startsWith('GIT_'))),
     GIT_CEILING_DIRECTORIES: base,
+    GIT_CONFIG_GLOBAL: path.join(base, 'no-global-gitconfig'),
+    GIT_CONFIG_NOSYSTEM: '1',
   });
   const env = isolatedGitEnv(process.env);
   const git = (cwd: string, ...args: string[]) => {
@@ -662,6 +666,40 @@ describe('cli render --origin as a child process', () => {
     return { code: result.status, stdout: result.stdout, stderr: result.stderr };
   };
   after(() => rmSync(base, { recursive: true, force: true }));
+
+  // Qodo PR review finding 039c99ec (local a54388e5, wrongly dismissed): on Windows, Node looks up a
+  // bare program name in the current directory before PATH unless NoDefaultCurrentDirectoryInExePath
+  // is set. Claude Code's shell sets it, which hid the bug; a normal terminal does not, so the test
+  // removes it. The fake git.exe is a copy of node that prints a forged remote.
+  test('runs the git on PATH, not a git.exe in the current directory (Windows)', { skip: process.platform !== 'win32' }, () => {
+    const repo = path.join(base, 'planted-git');
+    mkdirSync(repo);
+    git(repo, 'init', '-q');
+    git(repo, 'remote', 'add', 'origin', 'https://github.com/UBayouski/tracenotes.git');
+    copyFileSync(process.execPath, path.join(repo, 'git.exe'));
+    writeFileSync(path.join(repo, 'remote'), 'console.log("https://github.com/evil/pwned.git");\n');
+    const plain = Object.fromEntries(Object.entries(env).filter(([name]) => name.toLowerCase() !== 'nodefaultcurrentdirectoryinexepath'));
+    const { code, stdout, stderr } = runIn(repo, ['render', '--origin'], plain);
+    assert.equal(code, 0, stderr);
+    assert.ok(stdout.includes('[#1](https://github.com/UBayouski/tracenotes/pull/1)'), stdout);
+    assert.ok(!stdout.includes('evil'), stdout);
+  });
+
+  // Qodo PR review finding cb45117f: `git remote get-url` applies url.<base>.insteadOf from the
+  // caller's global config, so a developer's rewrite rule would change what the tests read.
+  test('ignores url.*.insteadOf in the caller\'s global git config', () => {
+    const home = path.join(base, 'home-insteadof');
+    mkdirSync(home);
+    writeFileSync(path.join(home, '.gitconfig'), '[url "https://mirror.example.com/a/b/"]\n\tinsteadOf = git@github.com:\n');
+    const hostile = isolatedGitEnv({ ...process.env, HOME: home, USERPROFILE: home, XDG_CONFIG_HOME: home });
+    const repo = path.join(base, 'insteadof');
+    mkdirSync(repo);
+    git(repo, 'init', '-q');
+    git(repo, 'remote', 'add', 'origin', 'git@github.com:UBayouski/tracenotes.git');
+    const { code, stdout, stderr } = runIn(repo, ['render', '--origin'], hostile);
+    assert.equal(code, 0, stderr);
+    assert.ok(stdout.includes('[#1](https://github.com/UBayouski/tracenotes/pull/1)'), stdout);
+  });
 
   // Qodo local review finding c72af242: under a git hook (or `git rebase -x`) GIT_DIR and friends
   // are set and would point git at the repository running the tests. A decoy repository stands

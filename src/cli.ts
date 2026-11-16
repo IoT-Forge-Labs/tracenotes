@@ -139,8 +139,15 @@ function readConfigFile(path: string): string {
 /**
  * Default origin reader: stdout of `git remote get-url origin` (local, no network), run without a
  * shell. Throws when git is missing or exits non-zero; git's stderr is captured, never printed.
+ *
+ * On Windows, Node (libuv) looks for a bare program name in the current directory before PATH,
+ * so a `git.exe` planted in the repository being rendered would run instead of git (Qodo PR review
+ * finding 039c99ec). Windows skips that lookup when `NoDefaultCurrentDirectoryInExePath` is set in
+ * the calling process's own environment, so it is set here, before the spawn. The CLI exits right
+ * after, and no later spawn of this process should search the current directory either.
  */
 function readOriginRemote(): string {
+  if (process.platform === 'win32') process.env['NoDefaultCurrentDirectoryInExePath'] = '1';
   return execFileSync('git', ['remote', 'get-url', 'origin'], {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
