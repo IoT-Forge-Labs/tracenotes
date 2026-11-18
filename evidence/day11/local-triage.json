@@ -1,0 +1,20 @@
+{"results":{"c72af242-8c09-4158-abaf-7b36e97030d0":{"status":"implemented","reconciled":true,"failed_effects":[],"retryable":false,"reason":null,"explanation":null,"detail":null}}}
+  trace ba2edfb8a960b61ad2ed37838ea8c1ea
+
+{"results":{"a54388e5-7e89-4379-97a2-59ea863f9773":{"status":"dismissed","reconciled":true,"failed_effects":[],"retryable":false,"reason":"false_positive","explanation":"Not reproduced (human approved dismissal Nov 16): a working fake git.exe in the current directory printed a forged URL when run directly, but Node 24.22.1 execFileSync('git') on Windows 11 in that directory ran the git on PATH and the links stayed correct.","detail":null}}}
+  trace 22bb00b9455d95715d251c753e06724c
+
+{"results":{"062cc9f6-2f0a-4d07-8dd0-c920ccc813b4":{"status":"dismissed","reconciled":true,"failed_effects":[],"retryable":false,"reason":"false_positive","explanation":"Not reproduced (human approved dismissal Nov 16): git 2.53 reads remote.origin.url from ~/.gitconfig (config --show-origin lists it) but 'git remote get-url origin' still reports No such remote 'origin'. A regression test with a fake home directory was added and passes.","detail":null}}}
+  trace 72df314b7ef7a23ebd0a856279444375
+
+{"results":{"b175921d-7cb2-4ad5-ba9a-ae826bbc8108":{"status":"implemented","reconciled":true,"failed_effects":[],"retryable":false,"reason":null,"explanation":null,"detail":null}}}
+  trace 236062294e5e13cca8f90f8bd024c66d
+
+{"results":{"12f291b1-8ffd-44b9-a1f9-cb3fdcb91124":{"status":"implemented","reconciled":true,"failed_effects":[],"retryable":false,"reason":null,"explanation":null,"detail":null}}}
+  trace 1fdfadf77f5fa360a5fa818af8df0a44
+
+{"results":{"8d7c5f5e-dfcb-4670-bdac-eea069faacd4":{"status":"implemented","reconciled":true,"failed_effects":[],"retryable":false,"reason":null,"explanation":null,"detail":null}}}
+  trace 1e3ce273df8e2ed3a99680d0cea85d71
+
+{"results":{"897d1e0d-792a-4a62-b0ca-2795845a5a9b":{"status":"dismissed","reconciled":true,"failed_effects":[],"retryable":false,"reason":"intentional","explanation":"Human decision Nov 16: the reader honors GIT_DIR/GIT_CONFIG_* like every git command (in a hook GIT_DIR names the repository the hook runs for); ticket criterion 9 amended accordingly. Only the tests isolate git from the caller's environment.","detail":null}}}
+  trace 93f259047387e4deba62ccb4eb4a2845

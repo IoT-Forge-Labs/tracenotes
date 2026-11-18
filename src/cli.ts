@@ -9,6 +9,7 @@
  * Exit codes: 0 success, 2 usage error.
  * This is the only module allowed to call process.exit or write to stdout/stderr directly.
  */
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { parseCommit } from './commit.ts';
@@ -16,6 +17,7 @@ import { parseConfig } from './config.ts';
 import type { Config } from './config.ts';
 import { parseGitLog } from './gitlog.ts';
 import { groupGitLog } from './group.ts';
+import { repoUrlFromRemote } from './remote.ts';
 import { checkRepoUrl, renderJson, renderMarkdown } from './render.ts';
 import { parseVersion, recommendVersion } from './version.ts';
 
@@ -30,10 +32,12 @@ Usage:
   tracenotes group [--config <path>]
                                 Group a git log stream (same input as log) into
                                 release-note sections and print JSON.
-  tracenotes render [--repo-url <url>] [--format markdown|json] [--config <path>]
+  tracenotes render [--repo-url <url> | --origin] [--format markdown|json] [--config <path>]
                                 Render a git log stream (same input as log) as
                                 Markdown release notes. With --repo-url
                                 https://<host>/<owner>/<repo>, SHAs and PRs are links.
+                                With --origin, the link base comes from
+                                git remote get-url origin (credentials dropped).
                                 With --format json, print the same notes as a JSON
                                 document: sections, entries with their source, counts.
   tracenotes version --current <x.y.z> [--config <path>]
@@ -72,6 +76,12 @@ export interface CliIo {
    * Throws when the file cannot be read or decoded.
    */
   readFile?: (path: string) => string;
+  /**
+   * Reads the origin remote for `render --origin`, exactly as git prints it; defaults to
+   * `git remote get-url origin` in the current directory. Throws when it cannot be read.
+   * Never called without --origin.
+   */
+  readOrigin?: () => string;
 }
 
 /**
@@ -124,6 +134,40 @@ function readConfigFile(path: string): string {
   } catch {
     throw new Error('the file is not valid UTF-8');
   }
+}
+
+/**
+ * Default origin reader: stdout of `git remote get-url origin` (local, no network), run without a
+ * shell. Throws when git is missing or exits non-zero; git's stderr is captured, never printed.
+ *
+ * On Windows, Node (libuv) looks for a bare program name in the current directory before PATH,
+ * so a `git.exe` planted in the repository being rendered would run instead of git (Qodo PR review
+ * finding 039c99ec). Windows skips that lookup when `NoDefaultCurrentDirectoryInExePath` is set in
+ * the calling process's own environment, so it is set here, before the spawn. The CLI exits right
+ * after, and no later spawn of this process should search the current directory either.
+ */
+function readOriginRemote(): string {
+  if (process.platform === 'win32') process.env['NoDefaultCurrentDirectoryInExePath'] = '1';
+  return execFileSync('git', ['remote', 'get-url', 'origin'], {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+    windowsHide: true,
+  });
+}
+
+/**
+ * Which origin read failure happened, from the only two error fields that never hold the remote
+ * or git's output: `code` (ENOENT when git is missing) and the numeric exit `status` (Qodo PR
+ * review finding 56942752). Anything else gets no detail rather than a guess.
+ */
+function originFailure(error: unknown): string {
+  if (typeof error !== 'object' || error === null) return '';
+  const { code, status } = error as { code?: unknown; status?: unknown };
+  if (code === 'ENOENT') return ': git not found';
+  if (Number.isInteger(status)) {
+    return `: git exited with status ${status as number} (not a git repository, no origin remote, or another git error)`;
+  }
+  return '';
 }
 
 const defaultIo: CliIo = {
@@ -215,11 +259,14 @@ export async function main(argv: string[], io: CliIo = defaultIo): Promise<numbe
 
   if (command === 'render') {
     let repoUrl: string | undefined;
+    let origin = false;
     let formatArg: string | undefined;
     let configPath: string | undefined;
     for (let i = 0; i < rest.length; i++) {
       const arg = rest[i]!;
-      if (arg === '--repo-url') {
+      if (arg === '--origin') {
+        origin = true;
+      } else if (arg === '--repo-url') {
         const value = rest[++i];
         if (value === undefined) {
           stderr('error: --repo-url needs a value\n');
@@ -245,6 +292,10 @@ export async function main(argv: string[], io: CliIo = defaultIo): Promise<numbe
         stderr(`error: unknown option "${arg}"\n\n${USAGE}`);
         return 2;
       }
+    }
+    if (origin && repoUrl !== undefined) {
+      stderr('error: --origin and --repo-url cannot be used together\n');
+      return 2;
     }
     // Validate the options before touching stdin so a bad value fails immediately.
     // The format is compared as given: no trimming, no lower-casing (Validate Before You Normalize).
@@ -276,6 +327,25 @@ export async function main(argv: string[], io: CliIo = defaultIo): Promise<numbe
     if (io.stdinIsTTY) {
       stderr(`error: no git log stream on stdin (stdin is a terminal)\n\n${USAGE}`);
       return 2;
+    }
+    if (origin) {
+      // Neither the remote nor git's output is ever printed: either may hold a token.
+      let remote: string;
+      try {
+        remote = (io.readOrigin ?? readOriginRemote)();
+      } catch (error) {
+        stderr(`error: cannot read the origin remote${originFailure(error)}\n`);
+        return 2;
+      }
+      try {
+        repoUrl = repoUrlFromRemote(remote);
+      } catch (error) {
+        if (error instanceof RangeError) {
+          stderr(`error: origin remote: ${error.message}\n`);
+          return 2;
+        }
+        throw error;
+      }
     }
     const stream = await io.readStdin();
     if (stream.trim().length === 0) {

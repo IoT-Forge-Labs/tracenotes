@@ -1,0 +1,47 @@
+```toml
+[github]
+ignore_bot_pr = false
+
+[github_app]
+ignore_bot_pr = false
+push_trigger_ignore_bot_commits = false
+
+[review_agent]
+issues_user_guidelines = """
+tracenotes is an offline, deterministic command line tool that turns a git log stream into
+release notes where every entry links to its source. Review with these product decisions in mind:
+
+1. Offline and deterministic. The tool never makes a network request and never calls the
+   GitHub API. The only process it may start is `git` (for example `git remote get-url origin`),
+   and only when the user asked for it with an explicit option. Flag any code path that reaches
+   the network, starts another program, or runs git without an explicit option, and any output
+   that depends on the current directory, the clock or the environment without an option saying so.
+2. Secrets in remotes. A git remote can carry credentials (`https://user:token@host/...`). Flag
+   any path where a remote URL, part of one, or git's own stdout/stderr can reach stdout, the
+   rendered notes, a JSON document, or an error message, including error paths and rejected input.
+3. Zero runtime dependencies is a decision, not a gap. Do not suggest adding a library (URL
+   parsers, argument parsers, git libraries); suggest a Node built-in or a smaller change.
+4. Validate before normalizing. Flag any `.trim()`, strip or rewrite of input that happens before
+   the raw value is checked, unless it is framing the code documents (the newline git prints, a
+   `.git` suffix, userinfo).
+5. Runs on Windows and Linux. Flag shell use, path separators, CRLF handling and process spawning
+   that would behave differently on one of them.
+6. Tests never touch the network or this repository. A test may run git only inside a throwaway
+   repository it created under the OS temp directory.
+
+Do not spend findings on style, naming or comment wording unless the text is wrong.
+"""
+
+compliance_user_guidelines = """
+The rules come from AGENTS.md (project rules 1 to 7 and the conventions). In each rule-violation
+finding, name the rule by its number and title, for example "Rule 6, Validate Before You
+Normalize", so the finding can be matched to the quality gate.
+"""
+
+enable_incremental_review = false
+
+inline_comments_severity_threshold = 2
+
+[review_agent_ux]
+expand_evidence = true
+```
