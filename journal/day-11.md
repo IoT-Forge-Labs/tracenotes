@@ -5,9 +5,14 @@ where it fell short for this product, change the review setup, re-run Qodo on th
 PR code, and compare the findings (feedback vs display). Decide to keep, adjust or undo. (The plan
 said "Give your agent the standards" for today; the thread is canonical.)
 
-Status: PR 26 (T-010) gate MET at `272cc47`, checks green, waiting for the human to merge. The
-review guidelines are kept, now in `.pr_agent.toml`; the wiki page is deleted after the merge.
+Status: PR 26 (T-010) gate MET at `5077949` (after one more fix, below), merged by the human as
+`d8199fe` on Nov 18; issue #25 closed. The review guidelines are kept, now in `.pr_agent.toml`;
+the wiki page is deleted after the merge.
 Evidence: `evidence/day11/`, comparison in `evidence/day11/comparison.md`.
+
+- Issue: https://github.com/UBayouski/tracenotes/issues/25
+- PR: https://github.com/UBayouski/tracenotes/pull/26
+- Post: https://github.com/orgs/qodo-hackathon/discussions/13#discussioncomment-19720416
 
 ## The PR: T-010, `render --origin`
 
