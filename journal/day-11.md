@@ -66,6 +66,14 @@ after the merge.
   cited test passes on Windows and Linux); the same mix-up as PR 14. Dismissed `false_positive`
   by the human.
 - `check` (Ubuntu, Windows) and `ticket-link` green at `272cc47`. Gate **MET**, merge state clean.
+- Nov 18: the journal commit `e211fe7` was reviewed too (not skipped as docs-only), with one new
+  informational finding, 56942752: every origin read failure printed the same fixed message, so
+  git missing, a missing remote and other git errors (such as `safe.directory`) all looked
+  alike. The agent first reported the PR as ready from green checks and the older gate note,
+  without reading the review at head; the human caught it. The human chose to fix it. The fix is
+  test-first (`evidence/day11/red-56942752.txt`, 7 red): the message now shows only the error's
+  `code` (`git not found`) and its integer exit `status`, never git's output. 296 tests. Read at
+  `e211fe7`: `evidence/day11/pr26-review-e211fe7-extended.json`.
 
 ## What went wrong on the way
 

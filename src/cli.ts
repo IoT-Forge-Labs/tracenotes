@@ -155,6 +155,21 @@ function readOriginRemote(): string {
   });
 }
 
+/**
+ * Which origin read failure happened, from the only two error fields that never hold the remote
+ * or git's output: `code` (ENOENT when git is missing) and the numeric exit `status` (Qodo PR
+ * review finding 56942752). Anything else gets no detail rather than a guess.
+ */
+function originFailure(error: unknown): string {
+  if (typeof error !== 'object' || error === null) return '';
+  const { code, status } = error as { code?: unknown; status?: unknown };
+  if (code === 'ENOENT') return ': git not found';
+  if (Number.isInteger(status)) {
+    return `: git exited with status ${status as number} (not a git repository, no origin remote, or another git error)`;
+  }
+  return '';
+}
+
 const defaultIo: CliIo = {
   get stdinIsTTY() { return process.stdin.isTTY === true; },
   readStdin,
@@ -318,8 +333,8 @@ export async function main(argv: string[], io: CliIo = defaultIo): Promise<numbe
       let remote: string;
       try {
         remote = (io.readOrigin ?? readOriginRemote)();
-      } catch {
-        stderr('error: cannot read the origin remote (git not installed, not a git repository, or no origin remote)\n');
+      } catch (error) {
+        stderr(`error: cannot read the origin remote${originFailure(error)}\n`);
         return 2;
       }
       try {

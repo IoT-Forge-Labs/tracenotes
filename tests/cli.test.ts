@@ -620,7 +620,36 @@ describe('cli render --origin with an injected reader', () => {
     const { code, out, err } = await run(['render', '--origin'], failing, failRead);
     assert.equal(code, 2);
     assert.equal(out, '');
-    assert.equal(err, 'error: cannot read the origin remote (git not installed, not a git repository, or no origin remote)\n');
+    assert.equal(err, 'error: cannot read the origin remote\n');
+  });
+
+  // Qodo PR review finding 56942752: one fixed message hid which failure happened. Only the
+  // error's `code` (ENOENT) and numeric exit `status` are shown; neither holds the remote or git's output.
+  test('git not found is reported as such (finding 56942752)', async () => {
+    const missing = (): string => {
+      throw Object.assign(new Error('spawnSync git ENOENT https://u:SECRET@h/o/r'), { code: 'ENOENT' });
+    };
+    const { code, out, err } = await run(['render', '--origin'], missing, failRead);
+    assert.equal(code, 2);
+    assert.equal(out, '');
+    assert.equal(err, 'error: cannot read the origin remote: git not found\n');
+  });
+
+  test('a git exit status is shown, git output is not (finding 56942752)', async () => {
+    const exited = (): string => {
+      throw Object.assign(new Error('Command failed'), { status: 128, stderr: 'fatal: https://u:SECRET@h/o/r' });
+    };
+    const { code, out, err } = await run(['render', '--origin'], exited, failRead);
+    assert.equal(code, 2);
+    assert.equal(out, '');
+    assert.equal(err, 'error: cannot read the origin remote: git exited with status 128 (not a git repository, no origin remote, or another git error)\n');
+  });
+
+  test('a status that is not an integer is never printed (finding 56942752)', async () => {
+    const odd = (): string => { throw Object.assign(new Error('x'), { status: 'SECRET', code: 'SECRET' }); };
+    const { code, err } = await run(['render', '--origin'], odd, failRead);
+    assert.equal(code, 2);
+    assert.equal(err, 'error: cannot read the origin remote\n');
   });
 
   test('a rejected remote exits 2 with one line and no part of the remote (criterion 8)', async () => {
@@ -745,7 +774,7 @@ describe('cli render --origin as a child process', () => {
     const { code, stdout, stderr } = runIn(repo, ['render', '--origin']);
     assert.equal(code, 2);
     assert.equal(stdout, '');
-    assert.match(stderr, /^error: cannot read the origin remote \(.*\)\n$/);
+    assert.match(stderr, /^error: cannot read the origin remote: git exited with status \d+ \(.*\)\n$/);
   });
 
   // Qodo local review finding 062cc9f6: a remote.origin.url in the user's own git config would
@@ -761,7 +790,7 @@ describe('cli render --origin as a child process', () => {
     const { code, stdout, stderr } = runIn(repo, ['render', '--origin'], hostile);
     assert.equal(code, 2, stdout);
     assert.equal(stdout, '');
-    assert.match(stderr, /^error: cannot read the origin remote \(.*\)\n$/);
+    assert.match(stderr, /^error: cannot read the origin remote: git exited with status \d+ \(.*\)\n$/);
   });
 
   test('a directory that is not a repository exits 2 with one error line', () => {
@@ -770,7 +799,7 @@ describe('cli render --origin as a child process', () => {
     const { code, stdout, stderr } = runIn(dir, ['render', '--origin']);
     assert.equal(code, 2);
     assert.equal(stdout, '');
-    assert.match(stderr, /^error: cannot read the origin remote \(.*\)\n$/);
+    assert.match(stderr, /^error: cannot read the origin remote: git exited with status \d+ \(.*\)\n$/);
   });
 
   test('usage documents --origin', () => {
