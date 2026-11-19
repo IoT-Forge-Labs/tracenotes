@@ -7,8 +7,10 @@ agent session on one real task, inspect what the agent actually did, refine and 
 changes still go through Qodo review. (The plan said "Close the review loop" for today; the
 thread is canonical.)
 
-Status: skills built in session (T-032, issue #29), not yet committed or reviewed. The fresh
-session is the human's, after the merge.
+PR: https://github.com/UBayouski/tracenotes/pull/30 (first commit `9ba1863`, by the agent at the human's request)
+
+Status: local gate NOT MET after three fix rounds, continued as a recorded exception. PR 30 open;
+the fresh session runs on its branch before the merge.
 
 ## The procedure
 
