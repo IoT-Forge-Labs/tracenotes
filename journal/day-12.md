@@ -9,8 +9,9 @@ before writing" with T-011 for today; the thread is canonical.)
 
 PR: https://github.com/UBayouski/tracenotes/pull/28 (draft, first commit `d52ba69`)
 
-Status: T-009 built in session, local gate NOT MET by design (the deliberate gap only). First
-commit and draft PR made by the agent at the human's request, under the new third exception.
+Status: PR 28 gate MET at `3bb2f6c` (run 2045283 complete, 5 of 5 findings implemented, 0 open;
+checks green). First commit and PR made by the agent at the human's request, under the new third
+exception. Waiting for the human to merge.
 
 ## Rule change: the agent may make a first commit when asked
 
@@ -101,3 +102,14 @@ one explanation is that issue #25's criteria were all met.
 Fix round (test-first, `evidence/day12/red-pr28-round1.txt`, 5 red): skip lines in stream order
 after the malformed lines, leading whitespace fails, the unknown option escaped, `oneLine()` on
 rule 7's set (`Default_Ignorable_Code_Point`, U+2800, U+FFFD, every space but U+0020). 316 tests.
+
+Review of `3bb2f6c` (run 2045283, standard, complete): all five `implemented`, no new finding
+(`evidence/day12/pr28-review-2-extended.json`). `check` (Ubuntu, Windows) and `ticket-link` green.
+Gate **MET**, merge state clean.
+
+## Lesson
+
+A review with the source connected can only show it used the source when the source says
+something the code does not. Write the expectation down first, make it one that no code and no
+rule can support, and then look for the citation: here the deliberate gap was the only finding
+that cited the issue, which is the evidence; the four other findings would have come without it.
