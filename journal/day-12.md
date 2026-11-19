@@ -7,6 +7,8 @@ caught, what it missed and what can be verified about its use of the source. A d
 documented, deliberate gap is allowed; it is never merged with the gap. (The plan said "Research
 before writing" with T-011 for today; the thread is canonical.)
 
+PR: https://github.com/UBayouski/tracenotes/pull/28 (draft, first commit `d52ba69`)
+
 Status: T-009 built in session, local gate NOT MET by design (the deliberate gap only). First
 commit and draft PR made by the agent at the human's request, under the new third exception.
 

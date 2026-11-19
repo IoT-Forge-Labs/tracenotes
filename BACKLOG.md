@@ -14,7 +14,7 @@ change through one of these tickets. Tickets are specified in `tickets/` as they
 | T-006 | Never drop a commit: Unclassified section and ignored counts (mostly delivered by T-003; rescope, see journal/day-06.md) | 07 Nov 10 | needs rescope |
 | T-007 | JSON output mode for machine consumers | 08 Nov 11 (issue #18; built in session, Qodo local review before commit) | done (PR 19) |
 | T-008 | Config file `.tracenotes.json` with ignore patterns (section names moved to T-027) | 09 Nov 12 (issue #20; built in session, held to the AGENTS.md quality gate) | done (PR 21) |
-| T-009 | `check` command: lint commit messages in a range against the convention | 12 Nov 17 (issue #27; built in session) | in progress |
+| T-009 | `check` command: lint commit messages in a range against the convention | 12 Nov 17 (issue #27; built in session) | done (PR 28) |
 | T-010 | Repository URL from the origin remote (`render --origin`, credentials dropped) | 11 Nov 16 (issue #25; built in session) | done (PR 26) |
 | T-011 | Select ranges by tag: since last tag, between two tags, by date | 12 Nov 17 | planned |
 | T-012 | Update `CHANGELOG.md` in place, idempotently | 13 Nov 18 | planned |
