@@ -12,8 +12,8 @@ https://github.com/UBayouski/tracenotes/pull/34 (inside). Issues #31, #32.
 
 - Post: _TODO_
 
-Status: both predictions held. #34 merged by the human as `49e7cee`; #33 open, waiting for its
-merge after #34 (merge order below). The Qodo trial showed "0 days left" all day.
+Status: both predictions held. #34 merged by the human as `49e7cee`, then #33 as `0ed246a`
+(merge order below); issues #31 and #32 closed. The Qodo trial showed "0 days left" all day.
 
 ## The gate, as a workflow
 
@@ -139,6 +139,15 @@ removing its own `T-034 planned` BACKLOG row, which would have conflicted with #
 (19:34:15Z), reviewed `e7720ea` completely, and added it again (19:34:36Z)
 (`evidence/day14/pr33/issue-events-2.json`). A label on an older head does not survive a new
 commit; the workflow judges each head again.
+
+**A skipped review does not bring it back.** The journal and evidence commit `17765f9` went on
+#33 last. Qodo removed the label on the push (19:44:28Z) and then skipped the review
+(run 2062792, `review_complete: false`, docs only). No label came back, and the human merged #33
+at 19:44:42Z without it. The quality gate was still MET at the merge: checks green at
+`17765f9`, and the skip counts under gate point 8 (every commit since the last complete review,
+`e7720ea`, changes only Markdown and `evidence/`). The label and the gate disagree here, which
+is the point of keeping them apart. Next time the docs commit goes in before the last code
+review, or on `main` after the merge.
 
 ## Diagram
 
