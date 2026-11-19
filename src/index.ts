@@ -11,3 +11,5 @@ export type { RenderOptions, NotesDocument, NotesSection, NotesEntry, NotesSourc
 export { repoUrlFromRemote } from './remote.ts';
 export { recommendVersion, parseVersion } from './version.ts';
 export type { Bump, RuleId, VersionTrigger, VersionRecommendation } from './version.ts';
+export { checkGitLog } from './check.ts';
+export type { CheckedCommit, CheckResult } from './check.ts';

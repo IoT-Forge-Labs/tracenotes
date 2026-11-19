@@ -219,9 +219,18 @@ human, and one line: `Quality gate: MET` or `Quality gate: NOT MET`, with the re
   unclear label, a change of ticket or scope, anything it is unsure about), it stops and asks
   before committing. Limits: `npm run check` passes; code fixes are test-first; new commits only,
   never an amend, force-push or rebase; never on `main`; no merge; labels and other triggers still
-  need approval. The first commit of a task, opening the pull request and merging stay human.
+  need approval. The first commit of a task, opening the pull request and merging stay human,
+  except as below.
+- Third exception (Day 12): when the human asks for it in the conversation, for one named task,
+  an interactive agent may make that task's first commit, push its branch and open its pull
+  request (draft or ready, as asked). Before committing, the agent gives the gate report and
+  states the branch, the files and the pull request title and body; the request covers that one
+  task and does not carry over. Limits: `npm run check` passes; never on `main`; new commits
+  only, never an amend, force-push or rebase; the pull request body follows the ticket rules
+  (`Closes #N`). Merging stays human, and so do labels and every other trigger.
 - Suggested commit messages carry no `Co-Authored-By` or other AI attribution trailer. Human
-  commits are the human's. Agent commits (bot commits on `agent/*` branches and review-fix
-  commits under the second exception) name the agent in a trailer.
+  commits are the human's. Agent commits (bot commits on `agent/*` branches, review-fix
+  commits under the second exception and first commits under the third) name the agent in a
+  trailer.
 - One ticket per pull request where possible.
 - Each hackathon day gets a note in `journal/day-NN.md`.

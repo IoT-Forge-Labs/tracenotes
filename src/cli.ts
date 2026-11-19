@@ -6,12 +6,13 @@
  *   tracenotes parse < message.txt        Parse one message from stdin.
  *   tracenotes --help
  *
- * Exit codes: 0 success, 2 usage error.
+ * Exit codes: 0 success, 1 check found a problem (check only), 2 usage error.
  * This is the only module allowed to call process.exit or write to stdout/stderr directly.
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { checkGitLog } from './check.ts';
 import { parseCommit } from './commit.ts';
 import { parseConfig } from './config.ts';
 import type { Config } from './config.ts';
@@ -44,6 +45,10 @@ Usage:
                                 Recommend the next version from a git log stream
                                 (same input as log) and print JSON with the rule
                                 and the commits that triggered it.
+  tracenotes check              Check that every commit in a git log stream (same
+                                input as log) has a Conventional Commits header.
+                                Lists each failing commit and unreadable record, skips
+                                merge commits, prints a summary; exits 1 on a problem.
   tracenotes --help             Show this help.
 
 --config <path> names a JSON file such as {"ignore": ["^chore\\\\(deps\\\\)"]}. Each pattern is a
@@ -51,7 +56,7 @@ regular expression tested against the first line of a commit message. A commit t
 left out of the notes and counted as ignored; group lists it with the pattern. A breaking change
 is never ignored. No config file is read unless --config is given.
 
-parse (without a message), log, group, render and version read stdin only when it is not a terminal.
+parse (without a message), log, group, render, version and check read stdin only when it is not a terminal.
 Pipe or redirect input to them; in an interactive shell they print this usage and exit 2.
 `;
 
@@ -110,14 +115,17 @@ function loadConfig(configPath: string | undefined, readFile: (path: string) => 
 }
 
 /**
- * Escape control characters and line separators as `\uXXXX` so a message built from a path, a
- * system error or file content stays on one line and cannot forge a second `error:` line.
- * Only adds characters; printable text is returned unchanged.
+ * Escape every control character (C0, DEL, C1), format character (bidi marks and overrides,
+ * zero-width characters, the soft hyphen, the byte order mark) and the line and paragraph
+ * separators as `\uXXXX` (above U+FFFF, one escape per UTF-16 half, which JSON and JavaScript both
+ * read; Qodo local review finding 9858a1e5), so a message built from a path, a
+ * system error, file content or a commit header stays on one line, reads as it runs, and cannot
+ * forge a second line. Only adds characters; printable text is returned unchanged (Qodo local
+ * review finding 14905284: the earlier C0/C1-only set let bidi overrides through).
  */
 function oneLine(text: string): string {
-  return text.replace(
-    /[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g,
-    ch => `\\u${ch.charCodeAt(0).toString(16).padStart(4, '0')}`,
+  return text.replace(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/gu, ch =>
+    [...Array(ch.length).keys()].map(i => `\\u${ch.charCodeAt(i).toString(16).padStart(4, '0')}`).join(''),
   );
 }
 
@@ -356,6 +364,32 @@ export async function main(argv: string[], io: CliIo = defaultIo): Promise<numbe
     const options = repoUrl === undefined ? {} : { repoUrl };
     stdout(format === 'json' ? renderJson(groups, options) : renderMarkdown(groups, options));
     return 0;
+  }
+
+  if (command === 'check') {
+    if (rest.length > 0) {
+      stderr(`error: unknown option "${rest[0]}"\n\n${USAGE}`);
+      return 2;
+    }
+    if (io.stdinIsTTY) {
+      stderr(`error: no git log stream on stdin (stdin is a terminal)\n\n${USAGE}`);
+      return 2;
+    }
+    const stream = await io.readStdin();
+    if (stream.trim().length === 0) {
+      stderr(`error: empty git log stream on stdin\n\n${USAGE}`);
+      return 2;
+    }
+    const result = checkGitLog(parseGitLog(stream));
+    let text = '';
+    for (const c of result.commits) {
+      // JSON.stringify quotes the header; oneLine escapes what JSON leaves raw (bidi, C1, U+2028).
+      if (c.verdict === 'fail') text += `fail ${c.shortSha} ${oneLine(JSON.stringify(c.header))}\n`;
+    }
+    for (const m of result.malformed) text += `malformed ${oneLine(m.reason)}\n`;
+    text += `checked ${result.total}: ${result.passed} passed, ${result.failed} failed, ${result.skipped} skipped, ${result.malformed.length} malformed\n`;
+    stdout(text);
+    return result.failed === 0 && result.malformed.length === 0 ? 0 : 1;
   }
 
   if (command === 'version') {

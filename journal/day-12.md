@@ -1,0 +1,75 @@
+# Day 12 — Nov 17 (worked Nov 18) — Give your factory the full picture
+
+Brief: https://github.com/orgs/qodo-hackathon/discussions/14. Pick one PR and its source ticket,
+write down one concrete expectation and where it is in the source, give Qodo the source, check
+the expectation in code and with a test, run Qodo on the PR head, and record what the review
+caught, what it missed and what can be verified about its use of the source. A draft PR with a
+documented, deliberate gap is allowed; it is never merged with the gap. (The plan said "Research
+before writing" with T-011 for today; the thread is canonical.)
+
+Status: T-009 built in session, local gate NOT MET by design (the deliberate gap only). First
+commit and draft PR made by the agent at the human's request, under the new third exception.
+
+## Rule change: the agent may make a first commit when asked
+
+Open since Nov 13. On Nov 18 the human said "go for it" to the commit and the draft PR; the agent
+pointed out that CLAUDE.md and AGENTS.md kept the first commit human, and the human chose to
+change the rule. AGENTS.md (Process rules), CLAUDE.md and the FACTORY.md gate 4 row now have a
+third exception: for one named task, asked in the conversation, the agent may make the first
+commit, push and open the pull request, after giving the gate report and stating branch, files,
+title and body. Merging, labels and triggers stay human. The rule change travels in this PR
+(human, Nov 18). The round 3 review ran before these Markdown edits.
+
+## Why T-009 and not T-011
+
+T-011 (ranges by tag) needs tracenotes to run `git log` itself, a product decision T-002 left
+open and the same ground T-010 took four review rounds to cover. T-009 (`check`) reads the same
+stdin stream as `render` and needs no git (human, Nov 18).
+
+## The source and the expectation
+
+- Source: issue https://github.com/UBayouski/tracenotes/issues/27 (GitHub Issues, so no extra
+  connection: the PR body names the issue). The issue body is the whole ticket,
+  `tickets/T-009-check-command.md`.
+- Product decisions (human, Nov 18): any commit type; merge commits skipped, counted and listed;
+  exit 0 / 1 / 2.
+- **Expectation:** criterion 3, "one line per skipped merge commit: `skip <short sha> merge
+  commit`". Rule 2 (Nothing Vanishes) is already met by the skipped count, so only the ticket
+  asks for the list. A review that flags its absence got it from the source.
+- **Deliberate gap (human-approved):** the first commit leaves those lines out, and the merge-only
+  CLI test asserts only the count. Stated in the PR body. Fixed before merge.
+
+## Baseline
+
+The PR 26 reviews (Day 11) never cited issue #25: citation types were only `pr_branch_file`,
+`pr_knowledge` and `web_page`, and the ticket file was cited as a file of the branch
+(`evidence/day11/pr26-review-*-extended.json`).
+
+## Local review (before the first commit)
+
+Investigation with Codebase Wisdom: `evidence/day12/raw/` (`pull-request similar` was down,
+`MT-UPSTREAM-DOWN`, twice). Local reviews run with `--ticket <issue URL>` and the session context
+(`evidence/day12/t009-context-*.json`), which named the gap as deliberate.
+
+| Round | Depth | Result |
+|---|---|---|
+| 1 | deep | 3 new. fbd0ecfa (High, Correctness) "Check output drops skipped merge commits", **cites `ticket` https://github.com/UBayouski/tracenotes/issues/27**; 14905284 (Medium, Security) control, format and separator characters reach the terminal raw; 96c793d3 (Low) same for malformed reasons. Meta: ticket body inline, 6332 chars. |
+| 2 | deep | First run failed (`MT-UPSTREAM-DOWN`, `remote_stream_incomplete`, `t009-review-2-deep-failed.json`); one retry completed. 14905284 and 96c793d3 gone; fbd0ecfa still open; 2 new Lows: 9858a1e5 (`\u{...}` is not a JSON escape), 2978cde6 (doc says "unchanged"). |
+| 3 | deep | After the human chose to fix both Lows (`red-t009-9858a1e5.txt`; surrogate-pair escapes, doc comment). 0 new; 9858a1e5 and 2978cde6 `implemented`; only fbd0ecfa open. 312 tests. |
+
+So, locally, Qodo used the issue: the finding that only the ticket can support cites it with
+`source_type: ticket`, and it was raised although the context called the gap deliberate.
+
+Fix round 1 (test-first, `evidence/day12/red-t009-14905284.txt`): `oneLine()` in `src/cli.ts`
+now escapes every Unicode control, format, line and paragraph separator character, and `check`
+applies it to the header and the malformed reason. 311 tests.
+
+## What went wrong on the way
+
+- Escapes written through the agent's tools came out wrong twice: a heredoc dropped one backslash
+  of `\\u001b` (a test caught it), and an edit wrote ` `, `‮` and others as raw
+  characters into `tests/cli.test.ts`. Rule 7's hygiene test failed with the file, line and
+  escape to write, and a small script rewrote them. The rule did what it was written for.
+- Two observations on existing parser code, not changed here: `parseCommit()` calls `.trim()` on
+  the header line before matching (`src/commit.ts:128`), and trailing whitespace before U+2028 or
+  U+2029 inside a header is removed by normalization.
