@@ -1,0 +1,16 @@
+  ✖ group: an unknown option is printed escaped (criterion 1) (72.4576ms)
+  ✖ render: an unknown option is printed escaped (criterion 1) (84.7471ms)
+  ✖ version: an unknown option is printed escaped (criterion 1) (88.6726ms)
+  ✖ an unknown command is printed escaped (criterion 2) (80.4762ms)
+  ✖ an invalid --format value is printed escaped (criterion 3) (79.1505ms)
+  ✖ an invalid --repo-url value is printed escaped (criterion 3) (71.4794ms)
+  ✖ an invalid --current value is printed escaped (criterion 3) (86.2534ms)
+✖ cli usage errors escape what the user typed (T-031) (795.2457ms)
+ℹ tests 92
+ℹ suites 8
+ℹ pass 85
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10841.2413
