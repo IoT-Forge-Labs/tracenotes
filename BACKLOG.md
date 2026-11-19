@@ -39,6 +39,7 @@ change through one of these tickets. Tickets are specified in `tickets/` as they
 | T-031 | Escape the unknown option in every command's usage error with `oneLine()` (only `check` does, PR 28 finding 731e5dee) | spare | planned |
 | T-032 | Skill `release-notes-audit`: render a git range and prove every commit is accounted for once and linked | 13 Nov 18 (issue #29; built in session) | done (PR 30) |
 | T-033 | Skill `pr-gate-check`: the quality gate at a PR head from Qodo's review session, findings and checks (split from T-032 on Day 13 with three open local findings) | spare | planned |
+| T-034 | Pin every action in `.github/workflows/` to a commit SHA, with a test that fails on an unpinned `uses:` | 14 Nov 19 (Day 14 inside-guard PR) | done (PR 34) |
 
 Process-only days: Day 02 (AGENTS.md), Day 22 (reproducibility pass), Day 23 (submission).
 
