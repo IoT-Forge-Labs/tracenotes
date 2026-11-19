@@ -1,0 +1,827 @@
+{
+  "sections": [
+    {
+      "title": "Features",
+      "entries": [
+        {
+          "sha": "d52ba6901d8324b7f0db5d5db0b063048a788836",
+          "shortSha": "d52ba69",
+          "subject": "lint commit headers in a git log stream (T-009)",
+          "scope": "check",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "feat"
+        },
+        {
+          "sha": "03d4a17d4ce6eca1f0a885181631b5653847e93e",
+          "shortSha": "03d4a17",
+          "subject": "add --origin, link base from the origin remote without its credentials (T-010)",
+          "scope": "render",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "feat"
+        },
+        {
+          "sha": "501f9838e2321b5e616b8a2d4d34d2bcf85897c0",
+          "shortSha": "501f983",
+          "subject": "add --config with ignore patterns and a quality gate (T-008)",
+          "scope": "config",
+          "prNumber": 20,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "feat"
+        },
+        {
+          "sha": "7a1d606f87b01c1bc8674d54af92190c783df311",
+          "shortSha": "7a1d606",
+          "subject": "add JSON output with --format json (T-007)",
+          "scope": "render",
+          "prNumber": 19,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "feat"
+        },
+        {
+          "sha": "b2910fecf52231fa7e2d8da34a182a085a5681d4",
+          "shortSha": "b2910fe",
+          "subject": "recommend the next version with the rule that produced it",
+          "scope": "version",
+          "prNumber": 15,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "feat"
+        },
+        {
+          "sha": "7f7af10857fe20a1c0b42d245e5a7d4871e320c3",
+          "shortSha": "7f7af10",
+          "subject": "render Markdown notes with a source link on every entry",
+          "scope": "render",
+          "prNumber": 13,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "feat"
+        },
+        {
+          "sha": "d3b0d315f0dac49c17f7ef0d988fc8aae225f41c",
+          "shortSha": "d3b0d31",
+          "subject": "group commits into release-note sections",
+          "scope": "group",
+          "prNumber": 11,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "feat"
+        },
+        {
+          "sha": "db554e520a47d3d14553640df0d02142fc412950",
+          "shortSha": "db554e5",
+          "subject": "parse git log streams from stdin (T-002)",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "feat"
+        },
+        {
+          "sha": "81eb4479a880cc19b2b493e4c3a472d9b84a89d2",
+          "shortSha": "81eb447",
+          "subject": "parse Conventional Commits messages (T-001)",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "feat"
+        }
+      ]
+    },
+    {
+      "title": "Bug fixes",
+      "entries": [
+        {
+          "sha": "3bb2f6c54ce07dd086d827bab4b838b26f7fcbe8",
+          "shortSha": "3bb2f6c",
+          "subject": "list skipped merges, fail leading whitespace, escape more (T-009)",
+          "scope": "check",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "fix"
+        },
+        {
+          "sha": "50779493f268d3166ecdbeca2514ee27071c9b4a",
+          "shortSha": "5077949",
+          "subject": "say which origin read failure happened, never git's output (T-010)",
+          "scope": "origin",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "fix"
+        },
+        {
+          "sha": "21bc1b1e2e3c167018d244463dd0791bcd37891e",
+          "shortSha": "21bc1b1",
+          "subject": "never run a git.exe from the working folder; isolate test git config (T-010)",
+          "scope": "origin",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "fix"
+        },
+        {
+          "sha": "85dffae575dc3440eeaf8cc23207e3755d4de50e",
+          "shortSha": "85dffae",
+          "subject": "show odd file names as escapes in the report (T-028)",
+          "scope": "hygiene",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "fix"
+        },
+        {
+          "sha": "e286eb930d8f256ed22e249c1a85a0e7092bfc09",
+          "shortSha": "e286eb9",
+          "subject": "resolve the three informational findings on PR 22",
+          "scope": "ci",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "fix"
+        },
+        {
+          "sha": "435b12e842d9a18ce3d85d5fee25b9907b069604",
+          "shortSha": "435b12e",
+          "subject": "resolve the PR 22 review findings on the ticket checks",
+          "scope": "ci",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "fix"
+        },
+        {
+          "sha": "931d447b6d21646af4427a63d90a079332253129",
+          "shortSha": "931d447",
+          "subject": "escape the config path in error lines (T-008)",
+          "scope": "config",
+          "prNumber": 20,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "fix"
+        },
+        {
+          "sha": "eb0dce77ec906edb7556cc65ce945f9a864e3511",
+          "shortSha": "eb0dce7",
+          "subject": "validate repo URL port and up front, show usage on empty stdin, reject unsafe PR numbers (Qodo PR 14)",
+          "scope": "render",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "fix"
+        },
+        {
+          "sha": "8a5c41a3dc576ab090c78ff5f84cdf6e53cc56eb",
+          "shortSha": "8a5c41a",
+          "subject": "print usage when stdin is a terminal",
+          "scope": "cli",
+          "prNumber": 4,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "fix"
+        },
+        {
+          "sha": "f8e9b11aa21d3b2bf8a3d4016ac376f7ff05d89f",
+          "shortSha": "f8e9b11",
+          "subject": "report junk before the SHA as malformed; strip PowerShell BOM",
+          "scope": "gitlog",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "fix"
+        },
+        {
+          "sha": "3450ffa6a211640cf8183c4a5d4981f5cf5677e5",
+          "shortSha": "3450ffa",
+          "subject": "address Qodo review findings on T-001",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "fix"
+        }
+      ]
+    },
+    {
+      "title": "chore",
+      "entries": [
+        {
+          "sha": "3e332b16354c76311078c4b9cb294c9cbf1af636",
+          "shortSha": "3e332b1",
+          "subject": "project scaffold, backlog, tickets, and journal",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "chore"
+        }
+      ]
+    },
+    {
+      "title": "ci",
+      "entries": [
+        {
+          "sha": "1433e3d4863bf0e2571ba2cea7925bbb82266497",
+          "shortSha": "1433e3d",
+          "subject": "required checks, ticket-link check and ticket guard (Day 10)",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "ci"
+        },
+        {
+          "sha": "2a74c314bb8cfe41b9d95b00945f12830b9257cd",
+          "shortSha": "2a74c31",
+          "subject": "force tag mode with track_progress so the agent gets the issue, a branch, and git",
+          "scope": "agent-ticket",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "ci"
+        },
+        {
+          "sha": "f9880ec9ccf491bb0fe5cc2fce4e32a6e2d03132",
+          "shortSha": "f9880ec",
+          "subject": "only push fixes to agent/* branches; no AI trailers on human commits",
+          "scope": "agent-fix",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "ci"
+        },
+        {
+          "sha": "71fb0c848f93d9325d10d995374780dac3169d09",
+          "shortSha": "71fb0c8",
+          "subject": "label-triggered agent workflow, T-026 ticket, bot-commit exception on agent/* (Day 4)",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "ci"
+        }
+      ]
+    },
+    {
+      "title": "docs",
+      "entries": [
+        {
+          "sha": "2142d2ae5719ffe810f2728734a4e0e4f15ff2ac",
+          "shortSha": "2142d2a",
+          "subject": "Day 12, PR 28 gate met, lesson",
+          "scope": "journal",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "ef866b218050e8a75200e49e2c21ad74f1a7d073",
+          "shortSha": "ef866b2",
+          "subject": "T-009 done (PR 28)",
+          "scope": "backlog",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "e211fe7df7bd9dc7d3f4a7f4e1e5ae701047e32e",
+          "shortSha": "e211fe7",
+          "subject": "Day 11, make the reviewer yours (PR 26 before/after)",
+          "scope": "journal",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "272cc4777b72f1f0c3b6151b2642c0a205410e02",
+          "shortSha": "272cc47",
+          "subject": "keep the Day 11 review guidelines in .pr_agent.toml; evidence",
+          "scope": "review",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "38c897839b1b1bf3e455e768a74f09d5ce2846c3",
+          "shortSha": "38c8978",
+          "subject": "correct FACTORY.md after review, README status for Day 10",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "ef500c8c0f94eeb6cef188c6d047f0f954f6ad27",
+          "shortSha": "ef500c8",
+          "subject": "correct FACTORY.md after review, README status for Day 10",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "a2ac51e5b823b81d1979894d42f7c5a85e835bd1",
+          "shortSha": "a2ac51e",
+          "subject": "FACTORY.md, the path from a ticket to main with its gates",
+          "scope": "factory",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "bb6c03ebfdc6c95a2c08b846ebfdf7c2430642a7",
+          "shortSha": "bb6c03e",
+          "subject": "mark T-028 done (PR 24)",
+          "scope": "backlog",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "9019690b272f4baeccbd5a73538801b12d9ba7e8",
+          "shortSha": "9019690",
+          "subject": "record the PR 22 gate result and the dismissals",
+          "scope": "journal",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "6dc9a90e17e8b454f24bdb685db76b20c48b19b8",
+          "shortSha": "6dc9a90",
+          "subject": "add T-028 source hygiene to the backlog",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "ca9f87e925a30d1cc538cff2080c6191f4ddc7fe",
+          "shortSha": "ca9f87e",
+          "subject": "count a skipped review for docs-only commits, record the PR 21 result",
+          "scope": "gate",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "f3dc67b1f6b35e657dccd4e338b99927c2d57a58",
+          "shortSha": "f3dc67b",
+          "subject": "let the agent act on its own on an open PR, stop on any question",
+          "scope": "agents",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "280c2fd2f3d5123ffdea0a2cadb7c184688c6c9a",
+          "shortSha": "280c2fd",
+          "subject": "Day 8 journal merge note and post link",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "25903fb23322e41386ea52167494dba82d9375e5",
+          "shortSha": "25903fb",
+          "subject": "link Day 7 post in journal",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "3576d568f7bfbbab5bbeefc0c9a2cbc287bcab8d",
+          "shortSha": "3576d56",
+          "subject": "T-005 done; Day 7 journal merge note",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "9a70ea37cde50664439956d86e97d43b64493562",
+          "shortSha": "9a70ea3",
+          "subject": "Day 7 journal and Review Resolver evidence for PR 16",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "04b761142b561a6804532c9ce011edee95698c9c",
+          "shortSha": "04b7611",
+          "subject": "Day 6 journal, T-004 ticket and Codebase Wisdom evidence; T-004 done",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "100c4904b9ecbbdd34081c7dedd5b13561597a2a",
+          "shortSha": "100c490",
+          "subject": "Day 5 addendum, T-003 via the factory; T-003 and T-026 done in backlog",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "89f9bc4149b996bdc96198d46b93583fbedff847",
+          "shortSha": "89f9bc4",
+          "subject": "Day 5 journal, import result and rule id",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "190db54db339835910085338797c6cc2f696e1fd",
+          "shortSha": "190db54",
+          "subject": "rule 6 lists all existing framing; workflows push without per-push approval (Qodo PR 9)",
+          "scope": "agents",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "e12a5994f2a0b0e19a5a042f65ef9a5bb495f993",
+          "shortSha": "e12a599",
+          "subject": "rule 6 Validate Before You Normalize from review history; push needs explicit approval (Day 5)",
+          "scope": "agents",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "91d3e81770851f3a25a00ab21b89a68cddb78ecf",
+          "shortSha": "91d3e81",
+          "subject": "set ignore_bot_pr in both sections; record the guard test",
+          "scope": "review",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "200e023829b33fb0c90806e59e8bc56a0adf562d",
+          "shortSha": "200e023",
+          "subject": "Day 4 journal; let Qodo review bot pushes on agent branches",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "fa5e41ab7f80562b881d19e470ae4da4b559c05b",
+          "shortSha": "fa5e41a",
+          "subject": "require child-process CLI tests in AGENTS.md; record PR 2 review",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "3af11aadac003837acea5bc9c26023c09cf2a614",
+          "shortSha": "3af11aa",
+          "subject": "add AGENTS.md factory rules, Day 1 journal, and LF line-ending policy",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        }
+      ]
+    },
+    {
+      "title": "refactor",
+      "entries": [
+        {
+          "sha": "4ee70d041cf521dafffb7e97f440cee294fca5f1",
+          "shortSha": "4ee70d0",
+          "subject": "inject stdout/stderr sinks so tests stop patching process streams",
+          "scope": "cli",
+          "prNumber": 4,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "refactor"
+        }
+      ]
+    },
+    {
+      "title": "test",
+      "entries": [
+        {
+          "sha": "3b09408388dcf62d0e2db238c1366215e4da0867",
+          "shortSha": "3b09408",
+          "subject": "forbid raw invisible characters in TypeScript sources (T-028)",
+          "scope": "hygiene",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "test"
+        },
+        {
+          "sha": "3e538a2c2c057964f010b4b28eb5e0020a1daac9",
+          "shortSha": "3e538a2",
+          "subject": "pin trigger order to render's section order; amend T-005 criterion 4 (Qodo PR 16)",
+          "scope": "version",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "test"
+        },
+        {
+          "sha": "49c8632878e2d34547e0ae58d2a7d5876baba78d",
+          "shortSha": "49c8632",
+          "subject": "pin that an indented Merge header is not ignored (Qodo PR 12)",
+          "scope": "group",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "test"
+        }
+      ]
+    },
+    {
+      "title": "Unclassified",
+      "entries": [
+        {
+          "sha": "d0b3721ad0bb46c3c6a21e8e8489f57f5baad95a",
+          "shortSha": "d0b3721",
+          "subject": "Journl day 11 update",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": null
+        },
+        {
+          "sha": "05ab5f192ec5d448a63665ec323f00671b28d8b6",
+          "shortSha": "05ab5f1",
+          "subject": "Updating on journal entries",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": null
+        },
+        {
+          "sha": "e3684e441398c91cd8bf16a211137720b35005bf",
+          "shortSha": "e3684e4",
+          "subject": "PR commit to resolve issue",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": null
+        }
+      ]
+    }
+  ],
+  "ignored": [
+    {
+      "sha": "3903f33627c346f351672c4fcdaca584e15f5b37",
+      "shortSha": "3903f33",
+      "subject": "Merge pull request #28 from UBayouski/t-009-check",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "d8199fe76a8c4d373f3e966d386338e264bf5796",
+      "shortSha": "d8199fe",
+      "subject": "Merge pull request #26 from UBayouski/t-010-repo-url",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "4d3062ec3d6c34e660e8af4499f85f5d4ddab515",
+      "shortSha": "4d3062e",
+      "subject": "Merge pull request #24 from UBayouski/t-028-source-hygiene",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "09c698fe27226c71c1b6f0c9b194496cbf696462",
+      "shortSha": "09c698f",
+      "subject": "Merge pull request #22 from UBayouski/day-10-required-checks",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "138b35e3736e2668fe2f010fc82dfa7b66a6c98b",
+      "shortSha": "138b35e",
+      "subject": "Merge pull request #21 from UBayouski/t-008-config-ignore",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "b6ea01f95e13281e11e01a43d08c775d5981e236",
+      "shortSha": "b6ea01f",
+      "subject": "Merge pull request #17 from UBayouski/agent/issue-15-t-005-recommend-the-next-version",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "5f14bc78666d383e1e6a3d6ac76d9d43fed030f1",
+      "shortSha": "5f14bc7",
+      "subject": "Merge pull request #16 from UBayouski/agent/issue-15-t-005-recommend-the-next-version",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "05bc8cb42ccef1052e3fcafa2a49b3716de2f78f",
+      "shortSha": "05bc8cb",
+      "subject": "Merge pull request #14 from UBayouski/agent/issue-13-t-004-render-markdown-notes-with",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "7d24cb136aab8907f995d155cea555bbe932e99d",
+      "shortSha": "7d24cb1",
+      "subject": "Merge branch 'day-05-addendum'",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "76ca0e77e82ed87fb4660b8812bad92aa6f15720",
+      "shortSha": "76ca0e7",
+      "subject": "Merge pull request #12 from UBayouski/agent/issue-11-t-003-group-commits-into-release-note",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "d5d16d500bccb1bf3802175410c19585341a89f9",
+      "shortSha": "d5d16d5",
+      "subject": "Merge pull request #10 from UBayouski/day-05-journal",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "02ce479c6195897243a7d0693053947b3429452a",
+      "shortSha": "02ce479",
+      "subject": "Merge pull request #9 from UBayouski/day-05-rule",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "a23048d6c89fa76ef4f9731493588758ac68515b",
+      "shortSha": "a23048d",
+      "subject": "Merge pull request #8 from UBayouski/day-04-journal",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "f6eda5c476444eff90b4a29eff7af6aff94a119a",
+      "shortSha": "f6eda5c",
+      "subject": "Merge pull request #7 from UBayouski/agent/issue-4-t-026-print-usage-instead-of",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "4271bad44549e51c744dd859754decd86b4f13d4",
+      "shortSha": "4271bad",
+      "subject": "Merge pull request #6 from UBayouski/day-04-tag-mode",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "1fc26e7ce01f5b499911e9541cac35d511aeedb6",
+      "shortSha": "1fc26e7",
+      "subject": "Merge pull request #5 from UBayouski/day-04-agent-trigger",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "1fe2aae8b4cf11ddccd5b13242fda076f0f824d2",
+      "shortSha": "1fe2aae",
+      "subject": "Merge pull request #3 from UBayouski/day-03-git-log-stream",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "aa6dc6485e7d88617a540c110733688c4dd940a2",
+      "shortSha": "aa6dc64",
+      "subject": "Merge pull request #2 from UBayouski/day-02-agents-md",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    },
+    {
+      "sha": "b40e806b100c5a4dec495e5abb9edf2a7ebcbd05",
+      "shortSha": "b40e806",
+      "subject": "Merge pull request #1 from UBayouski/day-01-parse-commit",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    }
+  ],
+  "malformed": [],
+  "total": 76
+}

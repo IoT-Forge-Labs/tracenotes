@@ -140,7 +140,7 @@ describe('sourceProblems', () => {
 });
 
 describe('source hygiene of this repository', () => {
-  const roots = ['src', 'tests', 'scripts'];
+  const roots = ['src', 'tests', 'scripts', '.claude/skills'];
   const files = roots
     .flatMap(root =>
       readdirSync(path.join(repoRoot, root), { recursive: true, encoding: 'utf8' })
@@ -151,7 +151,7 @@ describe('source hygiene of this repository', () => {
 
   test('criterion 5: the walk finds the TypeScript sources, and no fixture', () => {
     // An empty or partial walk would pass the next test without checking anything.
-    for (const expected of ['src/cli.ts', 'src/gitlog.ts', 'tests/gitlog.test.ts', 'tests/source-hygiene.test.ts', 'scripts/source-hygiene.ts']) {
+    for (const expected of ['src/cli.ts', 'src/gitlog.ts', 'tests/gitlog.test.ts', 'tests/source-hygiene.test.ts', 'scripts/source-hygiene.ts', '.claude/skills/release-notes-audit/scripts/audit.ts']) {
       assert.ok(files.includes(expected), `${expected} was not found by the walk`);
     }
     assert.deepEqual(files.filter(file => !file.endsWith('.ts') || file.startsWith('tests/fixtures/')), []);
