@@ -9,8 +9,10 @@ thread is canonical.)
 
 PR: https://github.com/UBayouski/tracenotes/pull/30 (first commit `9ba1863`, by the agent at the human's request)
 
-Status: local gate NOT MET after three fix rounds, continued as a recorded exception. PR 30 open;
-the fresh session runs on its branch before the merge.
+- Post: https://github.com/orgs/qodo-hackathon/discussions/15#discussioncomment-19724682
+
+Status: local gate NOT MET after three fix rounds, continued as a recorded exception. PR 30
+merged by the human as `7742d7f` on Nov 18 (recorded exception, below); issue #29 closed.
 
 ## The procedure
 

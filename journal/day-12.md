@@ -11,7 +11,9 @@ PR: https://github.com/UBayouski/tracenotes/pull/28 (draft, first commit `d52ba6
 
 Status: PR 28 gate MET at `3bb2f6c` (run 2045283 complete, 5 of 5 findings implemented, 0 open;
 checks green). First commit and PR made by the agent at the human's request, under the new third
-exception. Waiting for the human to merge.
+exception. Merged by the human as `3903f33` on Nov 18; issue #27 closed.
+
+- Post: https://github.com/orgs/qodo-hackathon/discussions/14#discussioncomment-19723485
 
 ## Rule change: the agent may make a first commit when asked
 
