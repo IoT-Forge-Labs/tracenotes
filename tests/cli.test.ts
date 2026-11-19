@@ -806,3 +806,124 @@ describe('cli render --origin as a child process', () => {
     assert.match(runIn(base, ['--help']).stdout, /tracenotes render \[--repo-url <url> \| --origin\] \[--format markdown\|json\] \[--config <path>\]/);
   });
 });
+
+describe('cli check (T-009)', () => {
+  const rec = (digit: string, message: string) =>
+    `${digit.repeat(40)}\u001fAda\u001f2026-11-18T10:00:00Z\u001f${message}\u001e\n`;
+  const usage = /Usage:\n {2}tracenotes parse <message>/;
+
+  test('every commit passes: exit 0, only the summary line (criteria 3, 5)', () => {
+    const { code, stdout, stderr } = runCli(['check'], rec('1', 'feat: a\n') + rec('2', 'fix(cli): b\n'));
+    assert.equal(code, 0, stderr);
+    assert.equal(stderr, '');
+    assert.equal(stdout, 'checked 2: 2 passed, 0 failed, 0 skipped, 0 malformed\n');
+  });
+
+  test('a failing commit is listed and exits 1 (criteria 3, 5)', () => {
+    const { code, stdout } = runCli(['check'], rec('1', 'feat: a\n') + rec('2', 'Journl day 11 update\n\nbody\n'));
+    assert.equal(code, 1);
+    assert.equal(stdout, 'fail 2222222 "Journl day 11 update"\nchecked 2: 1 passed, 1 failed, 0 skipped, 0 malformed\n');
+  });
+
+  test('a malformed record alone exits 1 with its reason (criteria 3, 5)', () => {
+    const { code, stdout } = runCli(['check'], 'ABCDEF\u001fMallory\u001f2026-11-04T12:00:00Z\u001fchore: bad sha\u001e\n');
+    assert.equal(code, 1);
+    assert.match(stdout, /^malformed .+\nchecked 1: 0 passed, 0 failed, 0 skipped, 1 malformed\n$/);
+  });
+
+  // Qodo PR review finding 15aa08e5 (the Day 12 deliberate gap): every skipped merge is listed.
+  test('a stream of only merge commits exits 0 and lists every merge (criteria 3, 5)', () => {
+    const { code, stdout } = runCli(['check'], rec('1', 'Merge pull request #1 from o/b\n') + rec('2', "Merge branch 'x'\n"));
+    assert.equal(code, 0);
+    assert.equal(stdout, 'skip 1111111 merge commit\nskip 2222222 merge commit\nchecked 2: 0 passed, 0 failed, 2 skipped, 0 malformed\n');
+  });
+
+  test('lines come in the order fail, malformed, skip, summary (criterion 3, finding 15aa08e5)', () => {
+    const stream = rec('1', 'Merge pull request #1 from o/b\n') + 'ABCDEF\u001fM\u001f2026-11-04T12:00:00Z\u001fchore: x\u001e\n' + rec('2', 'bad header\n');
+    const { code, stdout } = runCli(['check'], stream);
+    assert.equal(code, 1);
+    assert.deepEqual(stdout.split('\n').map(line => line.split(' ')[0]), ['fail', 'malformed', 'skip', 'checked', '']);
+  });
+
+  test('a control character in a header is printed escaped (criterion 4)', () => {
+    const { code, stdout } = runCli(['check'], rec('1', 'bad\u001b[31m red\n'));
+    assert.equal(code, 1);
+    assert.ok(!stdout.includes('\u001b'), JSON.stringify(stdout));
+    assert.ok(stdout.startsWith('fail 1111111 "bad\\u001b[31m red"\n'), stdout);
+  });
+
+  // Qodo local review finding 14905284 (and 96c793d3): JSON.stringify leaves DEL, C1 controls,
+  // U+2028/U+2029 and format characters such as bidi overrides raw.
+  test('no control, format or separator character reaches stdout raw (finding 14905284)', () => {
+    const raw = ['\u007f', '\u0085', '\u009b', '\u2028', '\u2029', '\u202e', '\u2066', '\u200b', '\u00ad', '\ufeff'];
+    const header = `bad ${raw.join('x')} end`;
+    const badSha = `ABC\u202eDEF\u2028`;
+    const { code, stdout } = runCli(['check'], rec('1', `${header}\n`) + `${badSha}\u001fM\u001f2026-11-04T12:00:00Z\u001fchore: x\u001e\n`);
+    assert.equal(code, 1);
+    for (const ch of raw) assert.ok(!stdout.includes(ch), `U+${ch.codePointAt(0)!.toString(16)} raw in ${JSON.stringify(stdout)}`);
+    assert.equal(stdout.split('\n').length, 4, JSON.stringify(stdout));
+    assert.ok(stdout.startsWith('fail 1111111 "bad \\u007fx\\u0085x\\u009bx\\u2028x\\u2029x\\u202ex\\u2066x\\u200bx\\u00adx\\ufeff end"\n'), stdout);
+    assert.match(stdout, /\nmalformed invalid sha: "ABC\\u202eDEF\\u2028"\n/);
+  });
+
+  // Qodo local review finding 9858a1e5: a \u{...} escape is not JSON, so a character above
+  // U+FFFF is written as its UTF-16 surrogate pair, which JSON.parse and JavaScript both read.
+  test('a format character above U+FFFF keeps the header a valid JSON string (finding 9858a1e5)', () => {
+    const header = `bad ${String.fromCodePoint(0xe0001)} tag`;
+    const { code, stdout } = runCli(['check'], rec('1', `${header}\n`));
+    assert.equal(code, 1);
+    const quoted = stdout.split('\n')[0]!.slice('fail 1111111 '.length);
+    assert.equal(JSON.parse(quoted), header);
+    assert.ok(quoted.includes('\\udb40\\udc01'), quoted);
+  });
+
+  // Qodo PR review finding 9ef963f7: AGENTS.md rule 7 also names the characters displayed as
+  // nothing (Default_Ignorable_Code_Point), U+2800, U+FFFD and every space but the ordinary one.
+  test('characters displayed as nothing and odd spaces are printed escaped (finding 9ef963f7)', () => {
+    const odd = ['\u034f', '\u3164', '\ufe0f', '\u2800', '\ufffd', '\u00a0', '\u3000'];
+    const { code, stdout } = runCli(['check'], rec('1', `feat${odd.join('')}: x\n`));
+    assert.equal(code, 1);
+    for (const ch of odd) assert.ok(!stdout.includes(ch), `U+${ch.codePointAt(0)!.toString(16)} raw in ${JSON.stringify(stdout)}`);
+    assert.ok(stdout.startsWith('fail 1111111 "feat\\u034f\\u3164\\ufe0f\\u2800\\ufffd\\u00a0\\u3000: x"\n'), stdout);
+  });
+
+  test('an empty stream exits 2 with the usage text (criterion 5)', () => {
+    const { code, stdout, stderr } = runCli(['check'], ' \n');
+    assert.equal(code, 2);
+    assert.equal(stdout, '');
+    assert.match(stderr, /^error: empty git log stream on stdin\n\n/);
+    assert.match(stderr, usage);
+  });
+
+  test('an argument after check exits 2 without reading stdin (criterion 5)', () => {
+    const { code, stdout, stderr } = runCli(['check', '--fix'], rec('1', 'feat: a\n'));
+    assert.equal(code, 2);
+    assert.equal(stdout, '');
+    assert.match(stderr, /^error: unknown option "--fix"\n\n/);
+  });
+
+  // Qodo PR review finding 731e5dee: an argument with a newline could forge a second error line.
+  test('an unknown option is printed escaped (finding 731e5dee)', () => {
+    const { code, stderr } = runCli(['check', 'a\nerror: forged\u202e']);
+    assert.equal(code, 2);
+    assert.ok(stderr.startsWith('error: unknown option "a\\u000aerror: forged\\u202e"\n\n'), JSON.stringify(stderr));
+  });
+
+  test('a terminal stdin exits 2 without reading it (criterion 5)', async () => {
+    let out = '';
+    let err = '';
+    const code = await main(['check'], {
+      stdinIsTTY: true,
+      readStdin: async () => { throw new Error('stdin must not be read'); },
+      stdout: text => { out += text; },
+      stderr: text => { err += text; },
+    });
+    assert.equal(code, 2);
+    assert.equal(out, '');
+    assert.match(err, /^error: no git log stream on stdin \(stdin is a terminal\)\n\n/);
+  });
+
+  test('usage documents check (criterion 7)', () => {
+    assert.match(runCli(['--help']).stdout, /tracenotes check {2,}/);
+  });
+});

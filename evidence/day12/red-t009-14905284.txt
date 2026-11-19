@@ -1,0 +1,454 @@
+
+> tracenotes@0.1.0 test
+> node --test "tests/**/*.test.ts"
+
+▶ checkGitLog (T-009)
+  ✔ every conventional header passes (criterion 1) (1.6098ms)
+  ✔ pass, fail, skip and malformed keep stream order and add up (criteria 1, 2) (0.2329ms)
+  ✔ an empty scope fails (criterion 6) (0.1089ms)
+  ✔ a merge commit is skipped, not failed, whatever its header (criterion 6) (1.0086ms)
+  ✔ the header is the first line only (criterion 4) (0.3224ms)
+✔ checkGitLog (T-009) (4.1753ms)
+▶ cli
+  ✔ parse with an argument prints JSON and exits 0 (106.2741ms)
+  ✔ parse reads the message from stdin when no argument is given (78.5964ms)
+  ✔ empty input exits 2 with an error (74.2771ms)
+  ✔ unknown command exits 2 and prints usage (76.2473ms)
+  ✔ log parses a stream from stdin, reports malformed records, and exits 0 (72.9607ms)
+  ✔ log with empty stdin exits 2 (81.1152ms)
+  ✔ group prints ReleaseGroups, passes malformed through, exits 0 (79.466ms)
+  ✔ group with empty stdin exits 2 (78.9804ms)
+  ✔ render prints Markdown with and without --repo-url, exits 0 (154.7677ms)
+  ✔ render rejects an invalid URL, a missing value and unknown options with nothing on stdout (285.4171ms)
+  ✔ render --format json prints the notes document, with and without --repo-url (223.5969ms)
+  ✔ render output is Markdown by default and with --format markdown; the last --format wins (379.6491ms)
+  ✔ render rejects an invalid, wrong-case, padded or missing --format with nothing on stdout (584.3442ms)
+  ✔ render: an invalid --format before a valid one is overridden; an invalid last one fails (457.044ms)
+  ✔ render --format json with empty stdin exits 2 (67.5453ms)
+  ✔ usage documents --format (68.9556ms)
+  ✔ render with empty stdin exits 2 (76.2235ms)
+  ✔ version prints the recommendation as JSON and exits 0 (79.1637ms)
+  ✔ version rejects bad arguments with nothing on stdout, before reading stdin (429.7791ms)
+  ✔ version with empty stdin exits 2 with usage (81.7703ms)
+  ✔ usage lists the version command (68.4075ms)
+  ✔ --help exits 0 and prints usage (66.3981ms)
+  ✔ piped stdin still parses (T-026 criterion 3) (67.3681ms)
+✔ cli (3740.4522ms)
+▶ cli --config
+  ✔ group lists commits ignored by config with their pattern (77.8595ms)
+  ✔ render counts commits ignored by config in Markdown and JSON (154.2209ms)
+  ✔ version ignores matching commits but never a breaking one (77.0341ms)
+  ✔ without --config the output is what it was (448.6874ms)
+  ✔ a missing value, a missing file and invalid files exit 2 with one error line naming the path (1118.9026ms)
+  ✔ a directory given as the config file is an error, not a crash (71.0908ms)
+  ✔ when --config is repeated only the last file is read (716.7785ms)
+  ✔ group now rejects an unknown argument with usage (233.212ms)
+  ✔ a config file that is not valid UTF-8 is rejected, not repaired (226.8348ms)
+  ✔ a newline in the path or in the file cannot add lines to the error (149.0856ms)
+  ✔ usage documents --config on group, render and version (70.4012ms)
+✔ cli --config (3344.6108ms)
+▶ cli with a terminal stdin
+  ✔ render validates --repo-url before reading stdin (0.6529ms)
+  ✔ render validates --format before reading stdin (T-007 criterion 9) (0.0868ms)
+  ✔ render --format json on a terminal prints error and usage, does not read stdin (0.14ms)
+  ✔ parse without argument prints error and usage, exits 2, does not read stdin (0.076ms)
+  ✔ log prints error and usage, exits 2, does not read stdin (0.1064ms)
+  ✔ group prints error and usage, exits 2, does not read stdin (0.0786ms)
+  ✔ render prints error and usage, exits 2, does not read stdin (0.0642ms)
+  ✔ version prints error and usage on a terminal, does not read stdin (0.1304ms)
+  ✔ version validates --current before reading stdin (0.1141ms)
+  ✔ parse with an argument never consults stdin (0.4842ms)
+  ✔ usage says stdin is read only when not a terminal (0.0757ms)
+✔ cli with a terminal stdin (2.2227ms)
+▶ cli --config with an injected reader
+  ✔ an invalid config fails before stdin is read (0.3064ms)
+  ✔ an unreadable config fails before stdin is read (0.0773ms)
+  ✔ control characters in a reader or parser message are escaped, one line out (0.1761ms)
+  ✔ the config is not read when another option is invalid, or without --config (0.4562ms)
+  ✔ only the last --config path is passed to the reader, exactly as given (0.2445ms)
+  ✔ DEL, C1 controls and line separators in the path are escaped in both error lines (0.1438ms)
+✔ cli --config with an injected reader (1.532ms)
+▶ cli render --origin with an injected reader
+  ✔ renders exactly as --repo-url would, in Markdown and JSON (criterion 6) (1.2218ms)
+  ✔ credentials in the remote never reach stdout (0.2149ms)
+  ✔ --origin with --repo-url is a usage error in either order, nothing read (criterion 7) (0.0933ms)
+  ✔ a repeated --origin is allowed and reads the remote once (0.1231ms)
+  ✔ the remote is read after the options are checked and before stdin (criterion 6) (0.1648ms)
+  ✔ a failed read exits 2 with one line and never echoes git output (criterion 8) (0.1323ms)
+  ✔ git not found is reported as such (finding 56942752) (0.0705ms)
+  ✔ a git exit status is shown, git output is not (finding 56942752) (0.0557ms)
+  ✔ a status that is not an integer is never printed (finding 56942752) (0.0495ms)
+  ✔ a rejected remote exits 2 with one line and no part of the remote (criterion 8) (0.0727ms)
+  ✔ git is never run without --origin (criterion 8) (0.2305ms)
+✔ cli render --origin with an injected reader (2.6225ms)
+▶ cli render --origin as a child process
+  ✔ runs the git on PATH, not a git.exe in the current directory (Windows) (626.068ms)
+  ✔ ignores url.*.insteadOf in the caller's global git config (136.8899ms)
+  ✔ ignores GIT_DIR, GIT_WORK_TREE and GIT_CONFIG_* inherited from the caller (222.5358ms)
+  ✔ builds links from the origin of the current repository, without its credentials (149.7568ms)
+  ✔ a repository without an origin remote exits 2 with one error line (140.7363ms)
+  ✔ ignores remote.origin.url in the caller's global git config (139.7491ms)
+  ✔ a directory that is not a repository exits 2 with one error line (101.3406ms)
+  ✔ usage documents --origin (73.2955ms)
+✔ cli render --origin as a child process (1641.1232ms)
+▶ cli check (T-009)
+  ✔ every commit passes: exit 0, only the summary line (criteria 3, 5) (87.0163ms)
+  ✔ a failing commit is listed and exits 1 (criteria 3, 5) (93.0959ms)
+  ✔ a malformed record alone exits 1 with its reason (criteria 3, 5) (78.4149ms)
+  ✔ a stream of only merge commits exits 0 (criteria 3, 5) (90.191ms)
+  ✔ a control character in a header is printed escaped (criterion 4) (93.7206ms)
+  ✖ no control, format or separator character reaches stdout raw (finding 14905284) (99.4698ms)
+  ✔ an empty stream exits 2 with the usage text (criterion 5) (89.3779ms)
+  ✔ an argument after check exits 2 without reading stdin (criterion 5) (82.6072ms)
+  ✔ a terminal stdin exits 2 without reading it (criterion 5) (0.6265ms)
+  ✔ usage documents check (criterion 7) (82.1473ms)
+✖ cli check (T-009) (797.5204ms)
+▶ header
+  ✔ parses type and subject (1.9188ms)
+  ✔ parses scope (0.3311ms)
+  ✔ lower-cases the type but keeps the subject as written (0.3809ms)
+  ✔ bang marks a breaking change (0.1313ms)
+  ✔ extracts a trailing PR number from squash merges (0.0984ms)
+  ✔ does not treat a PR-like token in the middle of the subject as the PR number (0.0679ms)
+  ✔ requires a space after the colon (0.0605ms)
+  ✔ rejects an empty scope (0.0832ms)
+  ✔ rejects a whitespace-only scope (0.1035ms)
+  ✔ rejects a scope with leading or trailing whitespace (0.1391ms)
+  ✔ accepts a scope with an inner space (0.1074ms)
+  ✔ rejects an empty description (0.0922ms)
+✔ header (4.7971ms)
+▶ non-conventional messages
+  ✔ are kept with the header as subject (0.1095ms)
+  ✔ still get PR number, body and footers (0.9661ms)
+  ✔ empty input yields an empty, non-conventional commit (0.0931ms)
+✔ non-conventional messages (1.2899ms)
+▶ body
+  ✔ is null when absent (0.0796ms)
+  ✔ keeps multiple paragraphs (0.067ms)
+  ✔ keeps leading indentation inside a paragraph (0.0343ms)
+  ✔ a paragraph that looks like prose is not a footer (0.1218ms)
+✔ body (0.3869ms)
+▶ footers
+  ✔ parses "Token: value" and "Token #value" forms (0.163ms)
+  ✔ BREAKING CHANGE footer marks breaking and records the note (0.075ms)
+  ✔ BREAKING-CHANGE is a synonym (0.0506ms)
+  ✔ multi-line footer values are joined (0.058ms)
+  ✔ collects several issue numbers from one footer and dedupes (0.0573ms)
+  ✔ issue tokens are matched case-insensitively (0.0535ms)
+  ✔ footers separated by blank lines are all collected and body stays separate (0.1069ms)
+✔ footers (0.6789ms)
+▶ normalization
+  ✔ handles CRLF line endings (0.0969ms)
+  ✔ trims trailing whitespace and blank lines (0.0417ms)
+✔ normalization (0.1922ms)
+▶ parseConfig
+  ✔ criterion 1: a valid file gives the patterns as written; exported from index (3.9211ms)
+  ✔ criterion 1: {} and an empty ignore list mean no patterns (0.2906ms)
+  ✔ criterion 1: text that is not JSON is rejected (0.8813ms)
+  ✔ criterion 1: a top level that is not an object is rejected (0.3356ms)
+  ✔ criterion 1: an unknown key is rejected and named (0.3049ms)
+  ✔ criterion 1: ignore that is not an array is rejected (0.3017ms)
+  ✔ criterion 1: an element that is not a string is rejected with its index (0.2283ms)
+  ✔ criterion 1: an empty pattern is rejected with its index (0.226ms)
+  ✔ criterion 1: an invalid regular expression is rejected with index and pattern (0.2669ms)
+  ✔ criterion 2: patterns are not trimmed, lower-cased or repaired (0.3082ms)
+  ✔ criterion 2: one leading byte order mark is allowed framing (1.3754ms)
+✔ parseConfig (10.4909ms)
+▶ parseGitLog
+  ✔ splits records and fields and keeps input order (3.9934ms)
+  ✔ a record with an invalid SHA goes to malformed with a reason, not dropped (0.6443ms)
+  ✔ a record with fewer than four fields is reported as missing fields (0.1491ms)
+  ✔ empty or whitespace-and-separator-only input yields an empty result (0.2323ms)
+  ✔ message content is passed through untouched apart from framing (0.2733ms)
+  ✔ count equals commits plus malformed (0.2258ms)
+  ✔ date is kept as a string and a non-ISO shape only produces a warning (0.2135ms)
+  ✔ fixture covers non-conventional and squash-merge records (0.204ms)
+  ✔ only framing newlines are stripped; a space or tab before the SHA makes the record malformed (0.2506ms)
+  ✔ a leading UTF-8 byte order mark (PowerShell pipes) is ignored (0.6089ms)
+  ✔ a message containing an extra field separator is kept whole (0.1628ms)
+✔ parseGitLog (8.6208ms)
+▶ groupCommits
+  ✔ criterion 1: fixed section order, empty sections omitted (1.1325ms)
+  ✔ criterion 1: full ordering of known and unknown types (0.2758ms)
+  ✔ criterion 2: entry fields (0.1521ms)
+  ✔ criterion 3: breaking commit only under Breaking changes, with notes (0.1459ms)
+  ✔ criterion 4: merge commits are ignored with a reason (0.0906ms)
+  ✔ criterion 5: totals add up on every fixture (0.6432ms)
+  ✔ criterion 6: order inside a section is input order (0.1547ms)
+  ✔ criterion 7: JSON round trip is lossless (0.1727ms)
+  ✔ criterion 9: only merge commits (0.1367ms)
+  ✔ criterion 9: feat! without footer has empty notes (0.1894ms)
+  ✔ criterion 9: unseen type gets its own section (0.1086ms)
+  ✔ a conventional commit whose subject starts with Merge is not ignored (0.0691ms)
+  ✔ rule 6: an indented "Merge " header is not a merge commit; it stays visible as Unclassified (0.0898ms)
+✔ groupCommits (4.5701ms)
+▶ groupCommits with ignore patterns
+  ✔ criterion 3: without options, and with an empty list, the result is unchanged (0.4649ms)
+  ✔ criterion 5: a match goes to ignored with the first matching pattern, as written (0.1246ms)
+  ✔ criterion 4: a merge commit keeps its reason even when a pattern matches it (0.1631ms)
+  ✔ criterion 4: a breaking commit is never ignored by a pattern (0.1456ms)
+  ✔ criterion 5: nothing vanishes with merges, matches and a matching breaking commit (0.0725ms)
+  ✔ criterion 3: the pattern sees the first line only, untrimmed, case-sensitive, u flag only (0.3439ms)
+  ✔ criterion 3: the same pattern list gives the same result twice (no regex state) (0.0927ms)
+  ✔ an invalid or empty pattern given to the library throws RangeError (0.3387ms)
+✔ groupCommits with ignore patterns (1.9849ms)
+▶ checkPrTicket
+  ✔ a ticket PR that closes its own issue and has the backlog row set passes (1.6347ms)
+  ✔ the PR 21 case: the title names a ticket and GitHub lists no issue to close (0.1993ms)
+  ✔ closing an issue that is not the ticket's is a problem (0.22ms)
+  ✔ an issue is the ticket's own only when its title starts with the id and a colon (0.3114ms)
+  ✔ the ticket's issue among other closed issues is enough (0.1144ms)
+  ✔ a PR that closes a ticket's issue is a ticket PR even when its title has no id (0.2035ms)
+  ✔ a PR that names no ticket and closes no ticket's issue has nothing to check (0.1014ms)
+  ✔ a ticket from the title and one from a closed issue are both checked (0.1387ms)
+  ✔ the backlog row must say done with this PR number (0.1589ms)
+  ✔ a ticket with no backlog row is a problem (0.162ms)
+  ✔ two backlog rows for one ticket are a problem, whatever they say (0.1247ms)
+  ✔ two unfinished tickets in one title are both checked, each once (0.1021ms)
+  ✔ a ticket in the title that another PR already finished is a mention, not a claim (0.1047ms)
+  ✔ a finished ticket is still a claim when the pull request closes its issue (0.0633ms)
+  ✔ only the exact form "done (PR n)" with another number makes a mention (0.1351ms)
+  ✔ an id that is part of a longer token is not a ticket (0.1107ms)
+  ✔ CRLF line endings in BACKLOG.md are read as line endings (0.0805ms)
+  ✔ a status is compared as written: extra spaces or other text do not pass (0.099ms)
+  ✔ control and invisible characters in a status are printed as escapes, on one line (0.2995ms)
+  ✔ a PR number that is not a positive integer is rejected (0.3948ms)
+✔ checkPrTicket (6.1199ms)
+▶ parseClosingIssues
+  ✔ reads number and title of each issue GitHub lists (0.2266ms)
+  ✔ more issues than one page holds is an error, not a shorter list (0.1053ms)
+  ✔ a GraphQL error, a missing pull request or a malformed answer is an error (0.2566ms)
+  ✔ the message of a GraphQL error is passed on (0.0719ms)
+✔ parseClosingIssues (0.8014ms)
+▶ run (in process, with a fake lookup)
+  ✔ writes nothing itself: the result carries the exit code and both streams (1.2166ms)
+  ✔ GitHub is asked once, for this pull request (0.258ms)
+  ✔ a PR without a ticket id that closes an ordinary issue has nothing to check (0.1549ms)
+  ✔ a PR without a ticket id that closes a ticket's issue is checked (2.0598ms)
+  ✔ a title that only mentions a ticket another PR finished: exit 0 and says so (0.9883ms)
+  ✔ a lookup that fails is an error, not a pass: exit 2, one line (0.3207ms)
+  ✔ an unreadable backlog path: exit 2 with one error line (0.4148ms)
+✔ run (in process, with a fake lookup) (5.8248ms)
+▶ pr-ticket-check as a child process
+  ✔ PR_NUMBER is validated as received: exit 2 (402.126ms)
+  ✔ GITHUB_REPOSITORY must be owner/name: exit 2 (253.7491ms)
+  ✔ a missing GITHUB_TOKEN is an error: exit 2 (77.4333ms)
+✔ pr-ticket-check as a child process (733.4645ms)
+▶ repoUrlFromRemote
+  ✔ accepts https://github.com/UBayouski/tracenotes (1.2101ms)
+  ✔ accepts https://github.com/UBayouski/tracenotes.git (0.1839ms)
+  ✔ accepts https://git.example.com:8443/team/app.git (0.0758ms)
+  ✔ accepts https://ci-user@github.com/o/r.git (0.1026ms)
+  ✔ accepts https://ci-user@github.com/o/r (0.0808ms)
+  ✔ accepts https://git.example.com:8443/team/app (0.0599ms)
+  ✔ accepts git@github.com:o/r (0.1756ms)
+  ✔ accepts ssh://git@github.com/o/r.git (0.1177ms)
+  ✔ accepts ssh://github.com/o/r (0.1796ms)
+  ✔ accepts ssh://git@git.example.com:2222/team/app.git (0.1232ms)
+  ✔ accepts ssh://git@git.example.com:65535/team/app (0.0684ms)
+  ✔ accepts git@gh.io:o/r.git (0.0877ms)
+  ✔ accepts git@github.com:o/r.git (0.0316ms)
+  ✔ accepts github.com:o/r (0.0276ms)
+  ✔ accepts git@github.com:My.Org/Repo_Name-2.git (0.0299ms)
+  ✔ removes one trailing \n or \r\n and nothing else (0.3486ms)
+  ✔ keeps host, owner and repo as written (0.056ms)
+  ✔ rejects "" (0.0551ms)
+  ✔ rejects "\n" (0.0322ms)
+  ✔ rejects " https://github.com/o/r" (0.0525ms)
+  ✔ rejects "https://github.com/o/r " (0.0327ms)
+  ✔ rejects "https://github.com/o /r" (0.0374ms)
+  ✔ rejects "https://github.com/o/r/" (0.0319ms)
+  ✔ rejects "https://github.com/o/r.git/" (0.0624ms)
+  ✔ rejects "https://github.com/o/r?x=1" (0.0359ms)
+  ✔ rejects "https://github.com/o/r#readme" (0.0332ms)
+  ✔ rejects "https://github.com/o" (0.0361ms)
+  ✔ rejects "https://gitlab.com/group/sub/r.git" (0.0315ms)
+  ✔ rejects "http://github.com/o/r.git" (0.0301ms)
+  ✔ rejects "git://github.com/o/r.git" (0.0404ms)
+  ✔ rejects "file:///srv/git/r.git" (0.0336ms)
+  ✔ rejects "/srv/git/r.git" (0.0342ms)
+  ✔ rejects "C:\\repos\\r" (0.0489ms)
+  ✔ rejects "../r" (0.0457ms)
+  ✔ rejects "git@github.com:/o/r.git" (0.0358ms)
+  ✔ rejects "git@github.com:o/r/x.git" (0.0664ms)
+  ✔ rejects "ssh://git@github.com:o/r.git" (0.0311ms)
+  ✔ rejects "https://github.com/o/r.git.git" (0.0525ms)
+  ✔ rejects "https://github.com/o/.git" (0.0454ms)
+  ✔ rejects "git@github.com:../r.git" (0.0503ms)
+  ✔ rejects "https://github.com/o/.." (0.0349ms)
+  ✔ rejects "C:work/repo" (0.0366ms)
+  ✔ rejects "c:work/repo.git" (0.0388ms)
+  ✔ rejects "git@C:work/repo" (0.039ms)
+  ✔ rejects "ssh://git@github.com:0/o/r.git" (0.0334ms)
+  ✔ rejects "ssh://git@github.com:99999/o/r.git" (0.0304ms)
+  ✔ rejects a port checkRepoUrl rejects (0.1061ms)
+  ✔ drops user:token userinfo from the URL (0.0914ms)
+  ✔ a rejected remote never appears in the error message (criterion 5) (0.21ms)
+  ✔ is exported from the package entry (criterion 1) (0.0895ms)
+✔ repoUrlFromRemote (6.6715ms)
+▶ renderMarkdown
+  ✔ criterion 1: pure and exported from index (1.2163ms)
+  ✔ criteria 2, 3, 5, 6: fixture without repoUrl (0.3347ms)
+  ✔ criterion 3: links with repoUrl (0.4433ms)
+  ✔ criterion 4: injection subject renders as text (0.1892ms)
+  ✔ criterion 4: nothing is trimmed (0.1387ms)
+  ✔ criterion 5: breaking with and without notes (0.129ms)
+  ✔ criterion 6: merge-only stream (0.0846ms)
+  ✔ criterion 6: counts match total and malformed (0.1717ms)
+  ✔ criterion 7: invalid repoUrl throws RangeError naming the value (0.9935ms)
+  ✔ oversized PR number is not rendered as a rounded, wrong PR link (0.2158ms)
+  ✔ criterion 7: valid forms accepted (0.3722ms)
+✔ renderMarkdown (5.4898ms)
+▶ notesDocument and renderJson
+  ✔ criterion 1: pure, exported from index, 2-space JSON with one trailing newline (0.9482ms)
+  ✔ criterion 1: the document shares no arrays with the groups (0.1244ms)
+  ✔ criteria 2, 3, 6: exact document for the fixture without repoUrl (0.2918ms)
+  ✔ criterion 3: exact document for the fixture with repoUrl (0.223ms)
+  ✔ criterion 2: key order is fixed at every level (0.3093ms)
+  ✔ criterion 3: every entry has a 40-character sha, with and without repoUrl (0.2569ms)
+  ✔ criterion 3: URLs are the ones the Markdown links use (0.5119ms)
+  ✔ criterion 3: oversized PR number gives null prNumber and prUrl, subject keeps the text (0.1026ms)
+  ✔ criterion 4: sections and entries in the order Markdown prints them (0.1788ms)
+  ✔ criterion 5: text is raw and round-trips through JSON.parse (0.1229ms)
+  ✔ criterion 5: nothing is trimmed (0.0645ms)
+  ✔ criterion 6: count identities, and the numbers match the Markdown closing line (0.1386ms)
+  ✔ criterion 7: merge-only range and empty input give a valid document (0.091ms)
+  ✔ criterion 8: invalid repoUrl throws RangeError naming the value (0.2455ms)
+✔ notesDocument and renderJson (3.9907ms)
+▶ render with ignore patterns
+  ✔ criterion 6: no pattern match leaves the Markdown byte-identical (0.2072ms)
+  ✔ criterion 6: the closing line splits merge commits from commits ignored by config (0.0863ms)
+  ✔ criterion 6: only pattern matches, no merge commit (0.0806ms)
+  ✔ criterion 7: the JSON document keeps its keys; counts.ignored is merges plus matches (0.0801ms)
+✔ render with ignore patterns (0.5632ms)
+▶ findRawInvisible
+  ✔ criteria 2, 4, 7: each forbidden character is reported with its position and escape (2.8804ms)
+  ✔ criteria 2, 3, 7: tab, line feed, space and visible non-ASCII are allowed (0.1952ms)
+  ✔ criterion 4: several characters come back in order; columns count UTF-16 code units (0.1199ms)
+  ✔ criterion 2: a carriage return is reported; only the line feed ends a line (0.0966ms)
+  ✔ criterion 2: U+2028 does not start a new line for the position (0.1065ms)
+  ✔ criterion 4: a lone surrogate does not throw and is not reported (0.0686ms)
+✔ findRawInvisible (4.6445ms)
+▶ describeRawInvisible
+  ✔ criterion 6: one line with path, position, code point and the escape to write (0.2829ms)
+  ✔ criterion 6: a path with control or invisible characters cannot split or spoof the line (0.1579ms)
+  ✔ criterion 5: the not-valid-UTF-8 line shows such a path the same way (0.1905ms)
+  ✔ criterion 6: the message itself contains no raw forbidden character (0.2073ms)
+✔ describeRawInvisible (1.0717ms)
+▶ sourceProblems
+  ✔ criterion 5: bytes that are not valid UTF-8 give one problem with the path (0.1861ms)
+  ✔ criteria 5, 6: valid UTF-8 gives one line per raw character, or nothing (0.1169ms)
+  ✔ a byte order mark at the start of a file is reported, not swallowed by the decoder (0.0895ms)
+✔ sourceProblems (0.5114ms)
+▶ source hygiene of this repository
+  ✔ criterion 5: the walk finds the TypeScript sources, and no fixture (0.1539ms)
+  ✖ criteria 5, 6, 8: no .ts file under src/, tests/ or scripts/ has a raw invisible or control character (19.6485ms)
+✖ source hygiene of this repository (19.9467ms)
+▶ hasInvestigation
+  ✔ the ticket format's bold label at the start of a line counts (1.5269ms)
+  ✔ a Markdown heading named Investigation counts (1.3713ms)
+  ✔ a body as GitHub sends it, with CRLF line endings, is read line by line (0.2136ms)
+  ✔ the word alone, mid-line, or in another form does not count (0.2076ms)
+  ✔ a section with nothing in it does not count (0.2653ms)
+  ✔ a heading section may start with a sub-heading or a bold phrase (0.166ms)
+  ✔ a heading section ends at a heading of the same or a higher level (0.1535ms)
+  ✔ a line that starts with an inline triple-backtick span does not hide the ticket (0.3364ms)
+  ✔ the section inside an HTML comment or a code fence does not count (0.2056ms)
+  ✔ a ticket of this repository written before the section existed is refused (0.9759ms)
+✔ hasInvestigation (7.3061ms)
+▶ ticket-ready as a child process
+  ✔ a ticket with an investigation: exit 0 (69.2546ms)
+  ✔ a ticket without one: exit 1, one line on stderr (69.2878ms)
+  ✔ an empty or missing body is a ticket without one: exit 1 (125.5266ms)
+✔ ticket-ready as a child process (264.2646ms)
+▶ recommendVersion
+  ✔ criterion 1: exported from the index and pure (2.5237ms)
+  ✔ fixture: breaking wins, counts and identities hold (0.537ms)
+  ✔ rule breaking-pre-1.0: breaking in 0.x bumps minor (0.1996ms)
+  ✔ a breaking commit marked only with ! triggers major (0.1221ms)
+  ✔ rule feat: minor, resets patch, lower entries are not triggers (0.1518ms)
+  ✔ rule fix: fix, perf and revert all trigger patch (0.1347ms)
+  ✔ rule fix: triggers follow section order, then input order within a section (0.1437ms)
+  ✔ rule none: only docs/chore keeps the version (0.1621ms)
+  ✔ only merge commits: none, all ignored (0.1368ms)
+  ✔ a malformed record is counted, not dropped (0.1655ms)
+  ✔ criterion 2: invalid versions throw RangeError naming the value (0.513ms)
+  ✔ criterion 3: overflow on bump throws RangeError (0.2138ms)
+✔ recommendVersion (6.1113ms)
+▶ recommendVersion with ignore patterns
+  ✔ a commit ignored by a pattern does not trigger a bump and is counted as ignored (0.35ms)
+  ✔ a breaking commit that matches a pattern still gives a major recommendation (0.1457ms)
+✔ recommendVersion with ignore patterns (0.6301ms)
+ℹ tests 311
+ℹ suites 33
+ℹ pass 309
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9712.6864
+
+✖ failing tests:
+
+test at tests\cli.test.ts:849:3
+✖ no control, format or separator character reaches stdout raw (finding 14905284) (99.4698ms)
+  AssertionError [ERR_ASSERTION]: U+7f raw in "fail 1111111 \"bad      ‮ ⁦ ​ ­ ﻿ end\"\nmalformed invalid sha: \"ABC‮DEF \"\nchecked 2: 0 passed, 1 failed, 0 skipped, 1 malformed\n"
+      at TestContext.<anonymous> (file:///D:/Projects/Qodo/dark_factory/tests/cli.test.ts:858:34)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
+
+test at tests\source-hygiene.test.ts:160:3
+✖ criteria 5, 6, 8: no .ts file under src/, tests/ or scripts/ has a raw invisible or control character (19.6485ms)
+  AssertionError [ERR_ASSERTION]: 
+  tests/cli.test.ts:850:49 raw U+2028, write \u2028
+  tests/cli.test.ts:850:54 raw U+2029, write \u2029
+  tests/cli.test.ts:850:59 raw U+202E, write \u202E
+  tests/cli.test.ts:850:64 raw U+2066, write \u2066
+  tests/cli.test.ts:850:69 raw U+200B, write \u200B
+  tests/cli.test.ts:850:74 raw U+00AD, write \u00AD
+  tests/cli.test.ts:850:79 raw U+FEFF, write \uFEFF
+  tests/cli.test.ts:852:24 raw U+202E, write \u202E
+  tests/cli.test.ts:852:28 raw U+2028, write \u2028
+  
+  + actual - expected
+  
+  + [
+  +   'tests/cli.test.ts:850:49 raw U+2028, write \\u2028',
+  +   'tests/cli.test.ts:850:54 raw U+2029, write \\u2029',
+  +   'tests/cli.test.ts:850:59 raw U+202E, write \\u202E',
+  +   'tests/cli.test.ts:850:64 raw U+2066, write \\u2066',
+  +   'tests/cli.test.ts:850:69 raw U+200B, write \\u200B',
+  +   'tests/cli.test.ts:850:74 raw U+00AD, write \\u00AD',
+  +   'tests/cli.test.ts:850:79 raw U+FEFF, write \\uFEFF',
+  +   'tests/cli.test.ts:852:24 raw U+202E, write \\u202E',
+  +   'tests/cli.test.ts:852:28 raw U+2028, write \\u2028'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Qodo/dark_factory/tests/source-hygiene.test.ts:175:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Promise.all (index 0)
+      at async Suite.run (node:internal/test_runner/test:1905:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'tests/cli.test.ts:850:49 raw U+2028, write \\u2028', 'tests/cli.test.ts:850:54 raw U+2029, write \\u2029', 'tests/cli.test.ts:850:59 raw U+202E, write \\u202E', 'tests/cli.test.ts:850:64 raw U+2066, write \\u2066', 'tests/cli.test.ts:850:69 raw U+200B, write \\u200B', 'tests/cli.test.ts:850:74 raw U+00AD, write \\u00AD', 'tests/cli.test.ts:850:79 raw U+FEFF, write \\uFEFF', 'tests/cli.test.ts:852:24 raw U+202E, write \\u202E', 'tests/cli.test.ts:852:28 raw U+2028, write \\u2028' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

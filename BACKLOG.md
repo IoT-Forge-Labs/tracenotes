@@ -14,7 +14,7 @@ change through one of these tickets. Tickets are specified in `tickets/` as they
 | T-006 | Never drop a commit: Unclassified section and ignored counts (mostly delivered by T-003; rescope, see journal/day-06.md) | 07 Nov 10 | needs rescope |
 | T-007 | JSON output mode for machine consumers | 08 Nov 11 (issue #18; built in session, Qodo local review before commit) | done (PR 19) |
 | T-008 | Config file `.tracenotes.json` with ignore patterns (section names moved to T-027) | 09 Nov 12 (issue #20; built in session, held to the AGENTS.md quality gate) | done (PR 21) |
-| T-009 | `check` command: lint commit messages in a range against the convention | 10 Nov 13 | planned |
+| T-009 | `check` command: lint commit messages in a range against the convention | 12 Nov 17 (issue #27; built in session) | done (PR 28) |
 | T-010 | Repository URL from the origin remote (`render --origin`, credentials dropped) | 11 Nov 16 (issue #25; built in session) | done (PR 26) |
 | T-011 | Select ranges by tag: since last tag, between two tags, by date | 12 Nov 17 | planned |
 | T-012 | Update `CHANGELOG.md` in place, idempotently | 13 Nov 18 | planned |
@@ -35,6 +35,8 @@ change through one of these tickets. Tickets are specified in `tickets/` as they
 | T-027 | Config: custom section names (split from T-008) | spare | planned |
 | T-028 | Source hygiene: no raw invisible or control characters in `.ts` files under `src/`, `tests/` and `scripts/`, rule in AGENTS.md plus a test that prints the escape to use (borrowed from pasokh, Day 2 reply) | 10 Nov 13 (built in session, checked against the factory diagram) | done (PR 24) |
 | T-029 | Label lane: Qodo review of the agent's branch before a pull request is opened, in a separate job that never runs ticket-written code and so can hold the Qodo key (the in-job version was removed on Day 10, journal/day-10.md) | 16 Nov 23 | planned |
+| T-030 | Parser: decide `conventional` on the raw header, no `.trim()` before the match (rule 6; `src/commit.ts:128`); found by Qodo on PR 28 (88effe66), worked around in `check` only | spare | planned |
+| T-031 | Escape the unknown option in every command's usage error with `oneLine()` (only `check` does, PR 28 finding 731e5dee) | spare | planned |
 
 Process-only days: Day 02 (AGENTS.md), Day 22 (reproducibility pass), Day 23 (submission).
 

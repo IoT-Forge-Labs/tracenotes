@@ -19,6 +19,8 @@ As of Day 10 of 23 (Nov 13). Working today, all from a `git log` stream on stdin
   `--repo-url` is given, or with `--origin` from the repository's own origin remote (credentials
   dropped, nothing sent over the network); `--format json` prints the same notes as a document.
 - `version --current <x.y.z>`: the next version with the rule and the commits that produced it.
+- `check`: every commit in the stream checked against the Conventional Commits header; failing
+  commits and unreadable records are listed, merge commits skipped and counted, exit 1 on a problem.
 - `--config <path>` on `group`, `render` and `version`: ignore patterns; ignored commits stay
   counted and a breaking change is never ignored.
 

@@ -1,0 +1,4 @@
+Including 20 untracked file(s): evidence/day12/raw/01-grep-conventional.json, evidence/day12/raw/01.stderr.txt, evidence/day12/raw/02-grep-group-types.json, evidence/day12/raw/03-list-commits-main.json, +16 more
+262 gitignored file(s) not reviewed.
+Reviewing UBayouski/tracenotes @ d0b3721ad — 147021B of local changes · deep depth (base cloned by the reviewer)
+  trace aac837f09e5cb82e9fd85b567851a6f3
