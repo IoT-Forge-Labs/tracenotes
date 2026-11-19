@@ -244,7 +244,7 @@ export async function main(argv: string[], io: CliIo = defaultIo): Promise<numbe
         // A repeated option overrides the earlier one, so only the last file is read.
         configPath = value;
       } else {
-        stderr(`error: unknown option "${arg}"\n\n${USAGE}`);
+        stderr(`error: unknown option "${oneLine(arg)}"\n\n${USAGE}`);
         return 2;
       }
     }
@@ -300,7 +300,7 @@ export async function main(argv: string[], io: CliIo = defaultIo): Promise<numbe
         }
         configPath = value;
       } else {
-        stderr(`error: unknown option "${arg}"\n\n${USAGE}`);
+        stderr(`error: unknown option "${oneLine(arg)}"\n\n${USAGE}`);
         return 2;
       }
     }
@@ -313,7 +313,8 @@ export async function main(argv: string[], io: CliIo = defaultIo): Promise<numbe
     let format: 'markdown' | 'json' = 'markdown';
     if (formatArg !== undefined) {
       if (formatArg !== 'markdown' && formatArg !== 'json') {
-        stderr(`error: invalid --format ${JSON.stringify(formatArg)}: expected markdown or json\n`);
+        // JSON.stringify escapes the newline but leaves C1 controls and bidi marks raw (T-031).
+        stderr(`error: invalid --format ${oneLine(JSON.stringify(formatArg))}: expected markdown or json\n`);
         return 2;
       }
       format = formatArg;
@@ -323,7 +324,8 @@ export async function main(argv: string[], io: CliIo = defaultIo): Promise<numbe
         checkRepoUrl(repoUrl);
       } catch (error) {
         if (error instanceof RangeError) {
-          stderr(`error: ${error.message}\n`);
+          // The message quotes the typed URL; escaped here, at the CLI edge (T-031).
+          stderr(`error: ${oneLine(error.message)}\n`);
           return 2;
         }
         throw error;
@@ -419,7 +421,7 @@ export async function main(argv: string[], io: CliIo = defaultIo): Promise<numbe
         }
         versionConfigPath = value;
       } else {
-        stderr(`error: unknown option "${arg}"\n\n${USAGE}`);
+        stderr(`error: unknown option "${oneLine(arg)}"\n\n${USAGE}`);
         return 2;
       }
     }
@@ -432,7 +434,8 @@ export async function main(argv: string[], io: CliIo = defaultIo): Promise<numbe
       parseVersion(current);
     } catch (error) {
       if (error instanceof RangeError) {
-        stderr(`error: ${error.message}\n`);
+        // The message quotes the typed version; escaped here, at the CLI edge (T-031).
+        stderr(`error: ${oneLine(error.message)}\n`);
         return 2;
       }
       throw error;
@@ -465,7 +468,7 @@ export async function main(argv: string[], io: CliIo = defaultIo): Promise<numbe
     return 0;
   }
 
-  stderr(`error: unknown command "${command}"\n\n${USAGE}`);
+  stderr(`error: unknown command "${oneLine(command)}"\n\n${USAGE}`);
   return 2;
 }
 

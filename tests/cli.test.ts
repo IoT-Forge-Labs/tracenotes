@@ -927,3 +927,64 @@ describe('cli check (T-009)', () => {
     assert.match(runCli(['--help']).stdout, /tracenotes check {2,}/);
   });
 });
+
+describe('cli usage errors escape what the user typed (T-031)', () => {
+  // A newline would forge a second error line; U+0085 is a C1 control; U+202E reverses the text
+  // after it on screen. Written as escapes here (AGENTS.md rule 7).
+  const hostile = '--a\nerror: forged\u0085\u202e';
+  const escaped = '--a\\u000aerror: forged\\u0085\\u202e';
+  const raw = /[\n\u0085\u202e]/u;
+  const usage = runCli(['--help']).stdout;
+
+  /** The part of stderr before the usage text: the error line itself, with its newline. */
+  function errorLine(stderr: string): string {
+    const end = stderr.indexOf('\n');
+    return stderr.slice(0, end + 1);
+  }
+
+  for (const command of ['group', 'render', 'version'] as const) {
+    test(`${command}: an unknown option is printed escaped (criterion 1)`, () => {
+      const { code, stdout, stderr } = runCli([command, hostile]);
+      assert.equal(code, 2);
+      assert.equal(stdout, '');
+      assert.equal(stderr, `error: unknown option "${escaped}"\n\n${usage}`);
+    });
+  }
+
+  test('an unknown command is printed escaped (criterion 2)', () => {
+    const { code, stdout, stderr } = runCli([`x${hostile}`]);
+    assert.equal(code, 2);
+    assert.equal(stdout, '');
+    assert.equal(stderr, `error: unknown command "x${escaped}"\n\n${usage}`);
+  });
+
+  // JSON.stringify already writes the newline as \n; the C1 control and U+202E it leaves raw.
+  const cases: Array<[string, string[], string]> = [
+    ['--format', ['render', '--format', hostile],
+      'error: invalid --format "--a\\nerror: forged\\u0085\\u202e": expected markdown or json\n'],
+    ['--repo-url', ['render', '--repo-url', hostile],
+      'error: invalid repoUrl "--a\\nerror: forged\\u0085\\u202e": expected https://<host>/<owner>/<repo> ' +
+      'with no trailing slash, .git suffix, query or fragment\n'],
+    ['--current', ['version', '--current', hostile],
+      'error: invalid version "--a\\nerror: forged\\u0085\\u202e": expected MAJOR.MINOR.PATCH ' +
+      '(non-negative integers, no leading zeros, no prefix or suffix)\n'],
+  ];
+  for (const [option, args, expected] of cases) {
+    test(`an invalid ${option} value is printed escaped (criterion 3)`, () => {
+      const { code, stdout, stderr } = runCli(args, 'unused');
+      assert.equal(code, 2);
+      assert.equal(stdout, '');
+      assert.equal(stderr, expected);
+      assert.doesNotMatch(errorLine(stderr).slice(0, -1), raw);
+    });
+  }
+
+  test('printable bad values give the same errors as before (criterion 4)', () => {
+    assert.equal(runCli(['render', '--fix']).stderr, `error: unknown option "--fix"\n\n${usage}`);
+    assert.equal(runCli(['nocmd']).stderr, `error: unknown command "nocmd"\n\n${usage}`);
+    assert.equal(
+      runCli(['render', '--format', 'xml'], 'unused').stderr,
+      'error: invalid --format "xml": expected markdown or json\n',
+    );
+  });
+});

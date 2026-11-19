@@ -1,0 +1,5 @@
+Including 1 untracked file(s): tickets/T-031-escape-usage-errors.md
+No coding-session context attached — pass --context-file (decisions + notes + recent_work; `-` reads stdin; summary is also accepted), or keep .qodo/session-context.json updated for automatic pickup.
+Reviewing UBayouski/tracenotes @ 532219fc7 — 11973B of local changes (filtered to 4 paths) · deep depth (base cloned by the reviewer)
+Local comparison: no saved checkpoint is available. The server will recover history or report a full fallback.
+  trace b5505cef719bd14deac1825cce84c4ab
