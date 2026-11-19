@@ -1,0 +1,275 @@
+import { after, describe, test } from 'node:test';
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { main } from '../src/cli.ts';
+import { FIELD_SEPARATOR as FS, RECORD_SEPARATOR as RS } from '../src/gitlog.ts';
+import { auditNotes } from '../.claude/skills/release-notes-audit/scripts/audit.ts';
+import type { AuditInput } from '../.claude/skills/release-notes-audit/scripts/audit.ts';
+
+// T-032. Inputs are built with the real CLI from a synthetic stream, the way the skill builds
+// them from `git log`; no test runs git (rule 5).
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const scriptPath = path.join(repoRoot, '.claude', 'skills', 'release-notes-audit', 'scripts', 'audit.ts');
+const repoUrl = 'https://github.com/o/r';
+const sha = (digit: string) => digit.repeat(40);
+const record = (s: string, message: string) => `${s}${FS}Ada${FS}2026-11-18T10:00:00Z${FS}${message}${RS}\n`;
+
+const commits: [string, string][] = [
+  [sha('a'), 'feat(cli): add check (#28)\n'],
+  [sha('b'), 'fix: escape more\n'],
+  [sha('c'), 'Merge pull request #28 from o/b\n'],
+  [sha('d'), 'Journl day 11 update\n'],
+  [sha('e'), 'feat!: drop old syntax\n\nBREAKING CHANGE: the old syntax is gone\n'],
+];
+
+async function run(argv: string[], stream: string): Promise<string> {
+  let out = '';
+  await main(argv, { stdinIsTTY: false, readStdin: async () => stream, stdout: t => { out += t; }, stderr: () => {} });
+  return out;
+}
+
+async function inputsFor(list: [string, string][], revList = list.map(([s]) => s)): Promise<AuditInput> {
+  const stream = list.map(([s, m]) => record(s, m)).join('');
+  return {
+    revList: revList.map(s => `${s}\n`).join(''),
+    group: await run(['group'], stream),
+    notesJson: await run(['render', '--repo-url', repoUrl, '--format', 'json'], stream),
+    notesMarkdown: await run(['render', '--repo-url', repoUrl], stream),
+    check: await run(['check'], stream),
+    repoUrl,
+  };
+}
+
+const failed = (input: AuditInput) => auditNotes(input).checks.filter(c => !c.ok).map(c => c.id);
+
+describe('auditNotes (T-032)', () => {
+  test('a clean range passes every check (criteria 2, 3)', async () => {
+    const result = auditNotes(await inputsFor(commits));
+    assert.deepEqual(result.checks.map(c => c.id), ['exactly-once', 'counts', 'json-links', 'markdown-links', 'check-agrees']);
+    assert.deepEqual(result.checks.filter(c => !c.ok), []);
+    assert.equal(result.passed, true);
+  });
+
+  test('a commit in the range but not in the notes fails exactly-once and counts, naming it', async () => {
+    const input = await inputsFor(commits.slice(1), commits.map(([s]) => s));
+    const result = auditNotes(input);
+    assert.deepEqual(failed(input), ['exactly-once', 'counts']);
+    assert.match(result.checks[0]!.detail, new RegExp(`missing: ${sha('a').slice(0, 7)}`));
+    assert.equal(result.passed, false);
+  });
+
+  test('a commit in the notes but not in the range fails exactly-once and json-links', async () => {
+    const input = await inputsFor(commits, commits.slice(1).map(([s]) => s));
+    assert.deepEqual(failed(input), ['exactly-once', 'counts', 'json-links']);
+    assert.match(auditNotes(input).checks[0]!.detail, new RegExp(`extra: ${sha('a').slice(0, 7)}`));
+  });
+
+  test('a commit listed twice in the range fails exactly-once', async () => {
+    const input = await inputsFor(commits, [...commits.map(([s]) => s), sha('b')]);
+    assert.ok(failed(input).includes('exactly-once'));
+  });
+
+  test('a Markdown entry without its commit link fails markdown-links', async () => {
+    const input = await inputsFor(commits);
+    input.notesMarkdown = input.notesMarkdown.replace(`(${repoUrl}/commit/${sha('b')})`, '(https://example.com)');
+    assert.deepEqual(failed(input), ['markdown-links']);
+  });
+
+  test('a JSON entry with a wrong link fails json-links', async () => {
+    const input = await inputsFor(commits);
+    input.notesJson = input.notesJson.replace(`${repoUrl}/commit/${sha('d')}`, `${repoUrl}/commit/${sha('f')}`);
+    assert.deepEqual(failed(input), ['json-links']);
+  });
+
+  test('a malformed record fails exactly-once and counts', async () => {
+    const list = commits.map(([s, m]) => record(s, m)).join('') + `NOTASHA${FS}x${FS}y${FS}chore: z${RS}\n`;
+    const input: AuditInput = {
+      revList: commits.map(([s]) => `${s}\n`).join(''),
+      group: await run(['group'], list),
+      notesJson: await run(['render', '--repo-url', repoUrl, '--format', 'json'], list),
+      notesMarkdown: await run(['render', '--repo-url', repoUrl], list),
+      check: await run(['check'], list),
+      repoUrl,
+    };
+    assert.deepEqual(failed(input), ['exactly-once', 'counts']);
+  });
+
+  // Qodo local review finding 44bb76a4: a set comparison let two entries trade sources.
+  test('two JSON entries with swapped sources fail json-links (finding 44bb76a4)', async () => {
+    const input = await inputsFor(commits);
+    const doc = JSON.parse(input.notesJson) as { sections: { entries: { source: unknown }[] }[] };
+    const all = doc.sections.flatMap(s => s.entries);
+    [all[0]!.source, all[1]!.source] = [all[1]!.source, all[0]!.source];
+    input.notesJson = JSON.stringify(doc);
+    assert.deepEqual(failed(input), ['json-links']);
+  });
+
+  // Qodo local review finding 7f66a5e3: the same for two Markdown lines.
+  test('two Markdown lines with swapped links fail markdown-links (finding 7f66a5e3)', async () => {
+    const input = await inputsFor(commits);
+    const a = `/commit/${sha('a')})`;
+    const b = `/commit/${sha('b')})`;
+    input.notesMarkdown = input.notesMarkdown.replace(a, '@A@').replace(b, a).replace('@A@', b);
+    assert.deepEqual(failed(input), ['markdown-links']);
+  });
+
+  // Qodo local review findings 7dc5829e and f9b538b4: the right links with the wrong subject,
+  // or the right order in the wrong section, are wrong notes.
+  test('a JSON entry with another entry\'s subject fails json-links (finding 7dc5829e)', async () => {
+    const input = await inputsFor(commits);
+    const doc = JSON.parse(input.notesJson) as { sections: { entries: { subject: string }[] }[] };
+    const all = doc.sections.flatMap(s => s.entries);
+    [all[0]!.subject, all[1]!.subject] = [all[1]!.subject, all[0]!.subject];
+    input.notesJson = JSON.stringify(doc);
+    assert.deepEqual(failed(input), ['json-links']);
+  });
+
+  test('a Markdown line with another entry\'s subject fails markdown-links (finding 7dc5829e)', async () => {
+    const input = await inputsFor(commits);
+    assert.ok(input.notesMarkdown.includes('add check'));
+    input.notesMarkdown = input.notesMarkdown.replace('add check', 'escape more');
+    assert.deepEqual(failed(input), ['markdown-links']);
+  });
+
+  test('a JSON entry moved to another section, same order, fails json-links (finding f9b538b4)', async () => {
+    const input = await inputsFor(commits);
+    const doc = JSON.parse(input.notesJson) as { sections: { title: string; entries: unknown[] }[] };
+    const features = doc.sections.findIndex(s => s.title === 'Features');
+    const fixes = doc.sections.findIndex(s => s.title === 'Bug fixes');
+    assert.equal(fixes, features + 1);
+    doc.sections[fixes]!.entries.unshift(...doc.sections[features]!.entries);
+    doc.sections.splice(features, 1);
+    input.notesJson = JSON.stringify(doc);
+    assert.deepEqual(failed(input), ['json-links']);
+  });
+
+  test('a Markdown entry under the wrong heading fails markdown-links (finding f9b538b4)', async () => {
+    const input = await inputsFor(commits);
+    assert.ok(input.notesMarkdown.includes('### Bug fixes\n\n'));
+    input.notesMarkdown = input.notesMarkdown.replace('### Bug fixes\n\n', '');
+    assert.deepEqual(failed(input), ['markdown-links']);
+  });
+
+  // Qodo local review finding 5638c83e: render escapes a subject's brackets, so link-shaped text
+  // in a subject is not a link and must not count as one.
+  test('commit-link text inside a subject does not fail a clean audit (finding 5638c83e)', async () => {
+    const subject = `feat: see [abc1234](https://example.com/o/r/commit/${sha('f')}) and [x](${repoUrl}/commit/${sha('a')})\n`;
+    const input = await inputsFor([[sha('1'), subject], ...commits]);
+    assert.ok(input.notesMarkdown.includes(`commit/${sha('f')})`), input.notesMarkdown);
+    assert.deepEqual(failed(input), []);
+  });
+
+  // Qodo local review finding 4f944bf8: check's own totals were not added up.
+  test('check totals that do not add up fail counts (finding 4f944bf8)', async () => {
+    const input = await inputsFor(commits);
+    assert.match(input.check, /checked 5: 3 passed, 1 failed, 1 skipped, 0 malformed/);
+    input.check = input.check.replace('3 passed', '2 passed');
+    assert.deepEqual(failed(input), ['counts']);
+  });
+
+  // Qodo local review finding 624dd0de: the summary's counts must match the lines check printed.
+  test('a skip count offset by extra passes fails check-agrees (finding 624dd0de)', async () => {
+    const input = await inputsFor(commits);
+    input.check = input.check.replace('3 passed, 1 failed, 1 skipped', '4 passed, 1 failed, 0 skipped');
+    assert.deepEqual(failed(input), ['check-agrees']);
+    const fails = await inputsFor(commits);
+    fails.check = fails.check.replace('3 passed, 1 failed', '2 passed, 2 failed');
+    assert.deepEqual(failed(fails), ['check-agrees']);
+  });
+
+  // Qodo local review finding 4b2ac78e: a second commit link to another base went unnoticed.
+  test('an entry line with a second commit link to another repository fails markdown-links (finding 4b2ac78e)', async () => {
+    const input = await inputsFor(commits);
+    const own = `(${repoUrl}/commit/${sha('a')})`;
+    input.notesMarkdown = input.notesMarkdown.replace(own, `${own}, [x](https://example.com/o/r/commit/${sha('f')})`);
+    assert.deepEqual(failed(input), ['markdown-links']);
+  });
+
+  // Qodo local review finding d457935f: skip lines carry short SHAs, which two merges can share.
+  test('two merges with the same short SHA still pass check-agrees (finding d457935f)', async () => {
+    const twin = `${'c'.repeat(7)}${'d'.repeat(33)}`;
+    const input = await inputsFor([...commits, [twin, 'Merge branch \'x\'\n']]);
+    assert.equal(input.check.split('\n').filter(line => line === `skip ${'c'.repeat(7)} merge commit`).length, 2);
+    assert.deepEqual(failed(input), []);
+    input.check = input.check.replace(`skip ${'c'.repeat(7)} merge commit\n`, '');
+    assert.deepEqual(failed(input), ['check-agrees']);
+  });
+
+  test('a check total that disagrees fails counts; a missing skip line fails check-agrees', async () => {
+    const input = await inputsFor(commits);
+    input.check = input.check.replace('checked 5:', 'checked 4:');
+    assert.deepEqual(failed(input), ['counts']);
+    const noSkip = await inputsFor(commits);
+    noSkip.check = noSkip.check.replace(`skip ${sha('c').slice(0, 7)} merge commit\n`, '');
+    assert.deepEqual(failed(noSkip), ['check-agrees']);
+  });
+
+  test('unreadable input throws RangeError, nothing is guessed (criterion 4)', async () => {
+    const good = await inputsFor(commits);
+    const cases: Partial<AuditInput>[] = [
+      { revList: 'abc\n' },
+      { revList: `${sha('A')}\n` },
+      { revList: '' },
+      { group: '{' },
+      { notesJson: 'not json' },
+      { check: 'fail x\n' },
+      { repoUrl: 'https://github.com/o/r/' },
+    ];
+    for (const change of cases) {
+      assert.throws(() => auditNotes({ ...good, ...change }), RangeError, JSON.stringify(change));
+    }
+  });
+});
+
+describe('release-notes-audit entry as a child process (criterion 5)', () => {
+  const base = mkdtempSync(path.join(os.tmpdir(), 'tracenotes-audit-'));
+  after(() => rmSync(base, { recursive: true, force: true }));
+
+  const write = (dir: string, input: AuditInput) => {
+    writeFileSync(path.join(dir, 'rev-list.txt'), input.revList);
+    writeFileSync(path.join(dir, 'group.json'), input.group);
+    writeFileSync(path.join(dir, 'notes.json'), input.notesJson);
+    writeFileSync(path.join(dir, 'notes.md'), input.notesMarkdown);
+    writeFileSync(path.join(dir, 'check.txt'), input.check);
+  };
+  const runScript = (args: string[]) => {
+    const result = spawnSync(process.execPath, [scriptPath, ...args], { encoding: 'utf8' });
+    return { code: result.status, stdout: result.stdout, stderr: result.stderr };
+  };
+
+  test('PASS: exit 0, one line per check and the verdict', async () => {
+    const dir = mkdtempSync(path.join(base, 'pass-'));
+    write(dir, await inputsFor(commits));
+    const { code, stdout, stderr } = runScript([dir, repoUrl]);
+    assert.equal(code, 0, stderr);
+    assert.equal(stderr, '');
+    const lines = stdout.trimEnd().split('\n');
+    assert.equal(lines.length, 6, stdout);
+    assert.ok(lines.slice(0, 5).every(line => line.startsWith('PASS ')), stdout);
+    assert.equal(lines[5], 'audit: PASS');
+  });
+
+  test('FAIL: exit 1 and the count of failed checks', async () => {
+    const dir = mkdtempSync(path.join(base, 'fail-'));
+    write(dir, await inputsFor(commits.slice(1), commits.map(([s]) => s)));
+    const { code, stdout } = runScript([dir, repoUrl]);
+    assert.equal(code, 1);
+    assert.match(stdout, /^FAIL exactly-once: /m);
+    assert.match(stdout, /\naudit: FAIL \(2 of 5 checks failed\)\n$/);
+  });
+
+  test('bad input or usage: exit 2, one error line, nothing on stdout', async () => {
+    const dir = mkdtempSync(path.join(base, 'bad-'));
+    write(dir, { ...(await inputsFor(commits)), revList: 'abc\n' });
+    for (const args of [[dir, repoUrl], [dir], [path.join(base, 'missing'), repoUrl]]) {
+      const { code, stdout, stderr } = runScript(args);
+      assert.equal(code, 2, args.join(' '));
+      assert.equal(stdout, '');
+      assert.match(stderr, /^error: [^\n]+\n$/);
+    }
+  });
+});

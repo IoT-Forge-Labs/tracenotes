@@ -87,6 +87,11 @@ npm run typecheck
 Rules for contributors and agents are in `AGENTS.md`. How a ticket gets to `main`, with every
 verification gate on one diagram, is in `FACTORY.md`.
 
+Agent skills for this repository live in `.claude/skills/` (Agent Skills format, found by Claude Code
+in this folder): `release-notes-audit` renders the notes for a git range and proves every commit is
+accounted for once and linked to its source (`scripts/audit.ts` inside the skill does the
+comparison).
+
 ## Reuse and licensing
 
 - Conventional Commits specification 1.0.0 (CC BY 3.0) as the grammar reference.

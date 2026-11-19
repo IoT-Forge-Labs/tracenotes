@@ -91,8 +91,8 @@ character U+FFFD are written as `\uXXXX` or `\u{XXXXX}` escapes, or built with
 to 16 bits). A carriage return counts: sources use LF. Visible characters outside ASCII (a
 plus-minus sign, an em dash) may be written directly; an emoji that carries a variation
 selector needs that selector written as an escape.
-- Applies to: every `.ts` file under `src/`, `tests/` and `scripts/`. Not to fixtures, which
-  hold raw bytes on purpose, and not to Markdown or JSON.
+- Applies to: every `.ts` file under `src/`, `tests/`, `scripts/` and `.claude/skills/`. Not to
+  fixtures, which hold raw bytes on purpose, and not to Markdown or JSON.
 - Enforced by: `tests/source-hygiene.test.ts`, which fails with the file, line, column, code
   point and the escape to write (`scripts/source-hygiene.ts`).
 - Why: an agent's file write turned an intended escape into the literal character four times
