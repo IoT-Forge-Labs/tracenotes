@@ -95,6 +95,39 @@ describe('unpinnedUses', () => {
     for (const p of problems) assert.match(p.reason, /unsupported/);
   });
 
+  // Qodo PR 34 review findings 2dab9c1b and 3a2670fe: a flow sequence and an explicit key.
+  // Fix round on the PR, recorded exception to the 3-round limit (human, Nov 19): any line with
+  // the word `uses` that is not exactly a pinned step is reported, and so is any explicit key.
+  test('a flow sequence, an explicit key or a tagged key is reported (PR 34 findings)', () => {
+    const text = [
+      '  - [uses: actions/checkout@v5]',
+      '  - ? uses',
+      '    : actions/checkout@v5',
+      '  - ? "u"',
+      '  - !!str uses: actions/checkout@v5',
+      '  # this step uses the cache',
+    ].join('\n');
+    assert.deepEqual(unpinnedUses(text, 'w.yml').map(p => p.line), [1, 2, 4, 5, 6]);
+  });
+
+  // Qodo PR 34 review finding 28bcc7c0 (High, rule 6): no trimming before the check. A hidden
+  // space after the SHA or the tag is not ASCII whitespace and must fail, not be stripped.
+  test('a non-ASCII space next to the SHA or the tag fails (finding 28bcc7c0)', () => {
+    for (const code of [0x00a0, 0xfeff, 0x2007, 0x3000]) {
+      const ch = String.fromCodePoint(code);
+      for (const line of [
+        `- uses: actions/checkout@${sha}${ch} # v5.1.0`,
+        `- uses: actions/checkout@${sha} # v5.1.0${ch}`,
+        `- uses:${ch}actions/checkout@${sha} # v5.1.0`,
+        `${ch}- uses: actions/checkout@${sha} # v5.1.0`,
+      ]) {
+        assert.equal(unpinnedUses(line, 'w.yml').length, 1, `U+${code.toString(16)} in ${JSON.stringify(line)}`);
+      }
+    }
+    // Tabs and spaces are ordinary YAML whitespace and still pass.
+    assert.deepEqual(unpinnedUses(`\t- uses:\tactions/checkout@${sha}\t#\tv5.1.0\t`, 'w.yml'), []);
+  });
+
   // Qodo local review finding da3acbde, kept on purpose: text that looks like the key is
   // reported too, because a silent miss is worse than a visible false alarm in this check.
   test('text that looks like a uses key is reported on purpose (fail closed)', () => {

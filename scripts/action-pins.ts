@@ -18,14 +18,19 @@ export interface PinProblem {
   reason: string;
 }
 
-// The one supported spelling: a block key `uses:` at the start of the line or after `- `.
-const USES = /^\s*(?:-\s+)?uses:\s*(.*)$/;
-// Anything else where `uses` could be a key: a space before the colon, a quoted key, a flow
-// mapping, anywhere on the line, comments included. A line regex cannot parse YAML, so the
-// check fails closed: such a line is reported, never skipped (human decision, Nov 19, after
-// Qodo local review findings 64a7ab3d, cb8ef482 and ccd2f27a). Text that only looks like the
-// key (in a `run:` string) is reported too; that false alarm is accepted (finding da3acbde).
-const USES_ANYWHERE = /(?:^|[\s{,"'])uses["']?\s*:/;
+// The one supported spelling, matched on the raw line with ASCII space and tab only, nothing
+// trimmed first (rule 6; Qodo PR 34 review finding 28bcc7c0): a block key `uses:` at the start
+// of the line or after `- `, the action, then optionally the release comment.
+const STEP = /^[ \t]*(?:-[ \t]+)?uses:[ \t]+([^ \t#]+)(?:[ \t]+(#.*?))?[ \t]*$/;
+// A line regex cannot parse YAML, so the check fails closed (human decisions, Nov 19): every
+// line with the word `uses` anywhere (a flow mapping or sequence, a quoted or tagged key, a
+// space before the colon, a comment, text in a `run:` string) is reported unless it is exactly
+// a pinned STEP. Qodo local review findings 64a7ab3d, cb8ef482, ccd2f27a; PR 34 review finding
+// 2dab9c1b. The false alarm on text is accepted (finding da3acbde).
+const USES_WORD = /(?<![A-Za-z0-9_-])uses(?![A-Za-z0-9_-])/;
+// An explicit key (`? key` with the value on a later line) is reported whatever the key says,
+// so a key spelled across lines is never skipped (Qodo PR 34 review finding 3a2670fe).
+const EXPLICIT_KEY = /^[ \t]*(?:-[ \t]+)?\?(?:[ \t]|$)/;
 // A double-quoted key with a backslash escape: YAML reads `"\u0075ses"` as `uses`, which no
 // text match sees (Qodo local review finding 5fa32f55). Any such key is reported. GitHub's
 // repository setting `sha_pinning_required` is the control; this check is the early warning.
@@ -33,38 +38,37 @@ const ESCAPED_KEY = /"[^"\n]*\\[^"\n]*"\s*:/;
 const PINNED = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+(?:\/[^\s@]+)?@[0-9a-f]{40}$/;
 // The exact release tag the SHA was taken from: `v1.2.3`, `1.2.3`, `v1.2.3-rc.1`, `v1.2.3+b`.
 // Not a moving tag or a note (Qodo local review findings af5d2700, a42b757b).
-const RELEASE_COMMENT = /^#\s*v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+const RELEASE_COMMENT = /^#[ \t]*v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
 /**
  * Finds the `uses:` lines in one workflow file that are not pinned.
  *
- * Input: the file's text and the name to report it under. Output: one problem per line where
- * `uses` can stand as a key, unless the line is exactly `uses: <owner>/<repo>[/<path>]@<40
- * lowercase hex> # <release tag>` (as a block key, optionally after `- `). Every other spelling
- * (a flow mapping, a quoted key, a space before the colon, a local `./` action, a `docker://`
- * image, a quoted value, the word in other text, or any double-quoted key with a backslash
- * escape) is reported as unsupported: the check fails closed. Other lines are ignored. Never
- * throws. This is an early warning; GitHub's `sha_pinning_required` setting enforces the rule.
+ * Input: the file's text and the name to report it under. Output: one problem per line that
+ * holds the word `uses`, an explicit key (`? …`) or a double-quoted key with a backslash
+ * escape, unless the line is exactly `uses: <owner>/<repo>[/<path>]@<40 lowercase hex>
+ * # <release tag>` as a block key (optionally after `- `), with only ASCII spaces and tabs
+ * around the parts. Nothing is trimmed before the match. Every other form is reported: the
+ * check fails closed. Other lines are ignored. Never throws. This is an early warning;
+ * GitHub's `sha_pinning_required` setting enforces the rule.
  */
 export function unpinnedUses(text: string, file: string): PinProblem[] {
   const problems: PinProblem[] = [];
   text.split('\n').forEach((raw, index) => {
-    const line = raw.replace(/\r$/, '');
-    if (!USES_ANYWHERE.test(line) && !ESCAPED_KEY.test(line)) return;
-    const match = USES.exec(line);
+    // The line ending is framing, not content: only the `\r` of a CRLF file is removed.
+    const line = raw.endsWith('\r') ? raw.slice(0, -1) : raw;
+    if (!USES_WORD.test(line) && !EXPLICIT_KEY.test(line) && !ESCAPED_KEY.test(line)) return;
+    const match = STEP.exec(line);
     if (!match) {
       problems.push({
         file,
         line: index + 1,
-        action: line.trim(),
-        reason: 'unsupported form: write the step as `uses: <owner>/<repo>@<sha> # <release tag>`, and keep `uses:` out of other text',
+        action: line,
+        reason: 'unsupported form: write the step as `uses: <owner>/<repo>@<sha> # <release tag>`, and keep `uses` out of other text',
       });
       return;
     }
-    const rest = match[1]!.trim();
-    const hash = rest.indexOf(' #');
-    const action = (hash === -1 ? rest : rest.slice(0, hash)).trim();
-    const comment = hash === -1 ? '' : rest.slice(hash + 1).trim();
+    const action = match[1]!;
+    const comment = match[2] ?? '';
     const report = (reason: string) => problems.push({ file, line: index + 1, action, reason });
     if (action.startsWith('./') || action.startsWith('docker://') || /^["']/.test(action)) {
       report('unsupported form: only <owner>/<repo>@<sha> is checked');
