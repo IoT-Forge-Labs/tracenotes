@@ -132,7 +132,7 @@ paste the same literal values at the top of every later block.
 
 | Check | Proves | Fails when |
 |---|---|---|
-| `exactly-once` | every commit of the range appears once in `group` (a section or ignored) and nothing else does | a commit is missing, extra or listed twice, or a record was malformed |
+| `exactly-once` | every commit of the range appears once in `group` (a section or ignored) and nothing else does; with no `--config`, only merge commits are ignored | a commit is missing, extra or listed twice, a non-merge commit is ignored, or a record was malformed |
 | `counts` | `group`, `notes.json`, the Markdown footer and `check` count the range's size; `shown + ignored = total`; the footer's shown, merge and config counts match; `check`'s verdicts add up | any count differs |
 | `json-links` | JSON entry k is `group`'s entry k: same commit, section, subject, scope, PR number and breaking notes; `commitUrl` is `<repo>/commit/<its sha>` and `prUrl` is `<repo>/pull/<n>` or null | a link is wrong, an entry is not in the range, out of order, or shows another section, subject, scope or PR |
 | `markdown-links` | Markdown entry line k, with its escapes removed, is exactly the line render writes for `group`'s entry k (scope, subject, commit link, PR link), under that entry's section heading, followed by exactly its breaking notes as `  - ` lines | a line has no link, two links, another commit's link, extra text, or the wrong heading, scope, subject or PR link |

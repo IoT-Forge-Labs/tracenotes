@@ -182,3 +182,25 @@ Markdown `  - ` lines) were not compared. Valid, and the last field render write
 Human: fix it, then the human decides the merge. Fixed test-first (`red-pr30-8f818660.txt`): lost,
 changed and invented notes fail. 345 tests. The audit now compares every field render prints for
 an entry (section, scope, subject, commit link, PR link, breaking notes) and the footer.
+
+Review of `37b35aa` (run 2046034, extended, incomplete again): 8f818660 `implemented`, all eleven
+earlier findings closed; one new High, 234d5143: without `--config`, a non-merge commit in
+`ignored` passed as "ignored by config", so a commit could be missing from consistent outputs.
+Valid. Fixed test-first (`red-pr30-234d5143.txt`, reproduced with the real CLI and a fixture
+config, so every output agreed about the missing commit). 346 tests.
+
+**Merge decision (human, Nov 18): merge after this fix as a recorded exception**, without
+waiting for another review round. Reasons on record: six PR review rounds, each finding one more
+valid thing the audit could prove, none of them a regression; Qodo never completed a review of
+PR 30 (five extended runs, all `review_complete: false`), so the gate's "completed review at the
+head" could not be met by waiting; the required checks are green on every head. Findings Qodo
+raises on this last head become a follow-up ticket, not more rounds here.
+
+## Lesson
+
+A skill is a procedure for someone who has never seen the conversation that wrote it. The
+drafting session's dry runs passed because it ran every step in one shell; the procedure would
+have failed in a fresh session (variables do not survive between calls), and only review caught
+that before the real run. And the audit itself kept growing because its first claim was
+membership ("every commit is there") while the real claim is correspondence ("every line is that
+commit's line"): eleven rounds of findings were the distance between the two.

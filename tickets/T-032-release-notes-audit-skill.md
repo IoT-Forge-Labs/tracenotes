@@ -44,7 +44,8 @@ describes on the range `d8199fe..3903f33` (6 commits) and reading the code.
    overall verdict. Doc comment with inputs, output and failure.
 3. Checks, each reported with what differed:
    - `exactly-once`: the SHAs in `group` (sections and ignored) equal the range's SHAs: none
-     missing, none extra, none twice; no malformed record.
+     missing, none extra, none twice; no malformed record; and, since the skill renders without
+     `--config`, every ignored commit is a merge commit.
    - `counts`: `group.total`, `notes.json` `counts.total`, the Markdown footer and `check`'s
      `checked <n>` equal the range's size; `shown + ignored === total`; the footer's shown, merge
      and config counts match; `check`'s verdicts add up; `malformed` is 0 everywhere.

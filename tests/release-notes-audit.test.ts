@@ -244,6 +244,25 @@ describe('auditNotes (T-032)', () => {
     assert.deepEqual(failed(added), ['markdown-links']);
   });
 
+  // PR 30 review, finding 234d5143: the skill runs without --config, so a commit in `ignored` that
+  // is not a merge is a commit missing from the notes, even when every output agrees about it.
+  test('a non-merge commit in ignored fails exactly-once, even with consistent outputs (finding 234d5143)', async () => {
+    const config = path.join(repoRoot, 'tests', 'fixtures', 'config-ignore-fix.json');
+    const stream = commits.map(([s, m]) => record(s, m)).join('');
+    const input: AuditInput = {
+      revList: commits.map(([s]) => `${s}\n`).join(''),
+      group: await run(['group', '--config', config], stream),
+      notesJson: await run(['render', '--repo-url', repoUrl, '--format', 'json', '--config', config], stream),
+      notesMarkdown: await run(['render', '--repo-url', repoUrl, '--config', config], stream),
+      check: await run(['check'], stream),
+      repoUrl,
+    };
+    assert.match(input.group, /"reason": "ignore pattern: \^feat"/);
+    const result = auditNotes(input);
+    assert.deepEqual(failed(input), ['exactly-once']);
+    assert.match(result.checks[0]!.detail, new RegExp(`ignored but not a merge: ${sha('a').slice(0, 7)}`));
+  });
+
   // PR 30 review, finding be79ef1c: the Markdown footer's counts must agree too.
   test('a Markdown footer with a wrong count fails counts (finding be79ef1c)', async () => {
     const input = await inputsFor(commits);

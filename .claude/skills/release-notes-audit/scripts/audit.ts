@@ -172,10 +172,19 @@ export function auditNotes(input: AuditInput): AuditResult {
   const missing = difference(range, new Set(placed));
   const extra = difference(placed, rangeSet);
   const twice = [...duplicates(placed), ...duplicates(range)];
+  // PR 30 review, finding 234d5143: the skill renders without --config, so the only commits that
+  // may be left out of the sections are merge commits (reason "merge commit", subject starting
+  // with "Merge "). Anything else in `ignored` is a commit missing from the notes.
+  const notMerge = ignored
+    .filter(e => {
+      const { reason, subject } = e as { reason?: unknown; subject?: unknown };
+      return reason !== 'merge commit' || typeof subject !== 'string' || !subject.startsWith('Merge ');
+    })
+    .map(e => shaOf(e, 'group.json'));
   checks.push({
     id: 'exactly-once',
-    ok: missing.length === 0 && extra.length === 0 && twice.length === 0 && groupMalformed === 0,
-    detail: `${n} commits in the range, ${placed.length} in the notes; missing: ${list(missing)}; extra: ${list(extra)}; twice: ${list(twice)}; malformed records: ${groupMalformed}`,
+    ok: missing.length === 0 && extra.length === 0 && twice.length === 0 && notMerge.length === 0 && groupMalformed === 0,
+    detail: `${n} commits in the range, ${placed.length} in the notes; missing: ${list(missing)}; extra: ${list(extra)}; twice: ${list(twice)}; ignored but not a merge: ${list(notMerge)}; malformed records: ${groupMalformed}`,
   });
 
   // counts: every tool agrees with the range's size.
