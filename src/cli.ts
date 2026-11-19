@@ -116,15 +116,18 @@ function loadConfig(configPath: string | undefined, readFile: (path: string) => 
 
 /**
  * Escape every control character (C0, DEL, C1), format character (bidi marks and overrides,
- * zero-width characters, the soft hyphen, the byte order mark) and the line and paragraph
- * separators as `\uXXXX` (above U+FFFF, one escape per UTF-16 half, which JSON and JavaScript both
+ * zero-width characters, the soft hyphen, the byte order mark), every space other than the
+ * ordinary one, the line and paragraph separators, the characters Unicode lists as displayed as
+ * nothing (Default_Ignorable_Code_Point: Hangul fillers, variation selectors, the combining
+ * grapheme joiner), the braille blank U+2800 and U+FFFD, the set AGENTS.md rule 7 names (Qodo PR
+ * review finding 9ef963f7), as `\uXXXX` (above U+FFFF, one escape per UTF-16 half, which JSON and JavaScript both
  * read; Qodo local review finding 9858a1e5), so a message built from a path, a
  * system error, file content or a commit header stays on one line, reads as it runs, and cannot
  * forge a second line. Only adds characters; printable text is returned unchanged (Qodo local
  * review finding 14905284: the earlier C0/C1-only set let bidi overrides through).
  */
 function oneLine(text: string): string {
-  return text.replace(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/gu, ch =>
+  return text.replace(/(?! )[\p{Cc}\p{Cf}\p{Zl}\p{Zp}\p{Zs}\p{Default_Ignorable_Code_Point}\u2800\ufffd]/gu, ch =>
     [...Array(ch.length).keys()].map(i => `\\u${ch.charCodeAt(i).toString(16).padStart(4, '0')}`).join(''),
   );
 }
@@ -368,7 +371,8 @@ export async function main(argv: string[], io: CliIo = defaultIo): Promise<numbe
 
   if (command === 'check') {
     if (rest.length > 0) {
-      stderr(`error: unknown option "${rest[0]}"\n\n${USAGE}`);
+      // Escaped: an argument can hold a newline or a control character (finding 731e5dee).
+      stderr(`error: unknown option "${oneLine(rest[0]!)}"\n\n${USAGE}`);
       return 2;
     }
     if (io.stdinIsTTY) {
@@ -387,6 +391,9 @@ export async function main(argv: string[], io: CliIo = defaultIo): Promise<numbe
       if (c.verdict === 'fail') text += `fail ${c.shortSha} ${oneLine(JSON.stringify(c.header))}\n`;
     }
     for (const m of result.malformed) text += `malformed ${oneLine(m.reason)}\n`;
+    for (const c of result.commits) {
+      if (c.verdict === 'skip') text += `skip ${c.shortSha} merge commit\n`;
+    }
     text += `checked ${result.total}: ${result.passed} passed, ${result.failed} failed, ${result.skipped} skipped, ${result.malformed.length} malformed\n`;
     stdout(text);
     return result.failed === 0 && result.malformed.length === 0 ? 0 : 1;

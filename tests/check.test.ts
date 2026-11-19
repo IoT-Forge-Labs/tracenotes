@@ -34,6 +34,17 @@ describe('checkGitLog (T-009)', () => {
     assert.equal(result.commits[0]!.header, 'Journl day 11 update');
   });
 
+  // Qodo PR review finding 88effe66: parseCommit() decides `conventional` on a trimmed header
+  // (src/commit.ts:128), so check looks at the raw first line itself (rule 6).
+  test('a header with leading whitespace fails (finding 88effe66)', () => {
+    for (const header of ['  feat: x', '\tfeat: x', '\u00a0feat: x']) {
+      const commit = check(record(sha('1'), `${header}\n`)).commits[0]!;
+      assert.equal(commit.verdict, 'fail', JSON.stringify(header));
+      assert.equal(commit.reason, 'not a conventional commit header');
+    }
+    assert.equal(check(record(sha('1'), 'feat: x  \n')).commits[0]!.verdict, 'pass');
+  });
+
   test('an empty scope fails (criterion 6)', () => {
     assert.equal(check(record(sha('1'), 'feat(): x\n')).commits[0]!.verdict, 'fail');
   });

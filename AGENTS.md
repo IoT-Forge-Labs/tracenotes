@@ -224,8 +224,10 @@ human, and one line: `Quality gate: MET` or `Quality gate: NOT MET`, with the re
 - Third exception (Day 12): when the human asks for it in the conversation, for one named task,
   an interactive agent may make that task's first commit, push its branch and open its pull
   request (draft or ready, as asked). Before committing, the agent gives the gate report and
-  states the branch, the files and the pull request title and body; the request covers that one
-  task and does not carry over. Limits: `npm run check` passes; never on `main`; new commits
+  states the branch, the files and the pull request title and body, then waits for the human's
+  go-ahead in the conversation; a request made before the report was given does not count as
+  that go-ahead (Qodo PR review finding f6bbf647). The request covers that one task and does
+  not carry over. Limits: `npm run check` passes; never on `main`; new commits
   only, never an amend, force-push or rebase; the pull request body follows the ticket rules
   (`Closes #N`). Merging stays human, and so do labels and every other trigger.
 - Suggested commit messages carry no `Co-Authored-By` or other AI attribution trailer. Human

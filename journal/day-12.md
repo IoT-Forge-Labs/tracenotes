@@ -75,3 +75,29 @@ applies it to the header and the malformed reason. 311 tests.
 - Two observations on existing parser code, not changed here: `parseCommit()` calls `.trim()` on
   the header line before matching (`src/commit.ts:128`), and trailing whitespace before U+2028 or
   U+2029 inside a header is removed by normalization.
+
+## PR 28: the review with the source
+
+The draft got no Qodo review (only a "trial ends soon" comment); after the human clicked "Ready
+for review", run 2045210 (standard depth, complete) reviewed head `ef866b2`
+(`evidence/day12/pr28-review-1-extended.json`). Checks green on that head.
+
+| Finding | Level | Source used | Decision |
+|---|---|---|---|
+| 15aa08e5 Check output drops the merge-commit skip lines | High | **`ticket` https://github.com/UBayouski/tracenotes/issues/27**, plus the PR body: "The PR description says this is a known gap ... but the diff as submitted still violates the output contract." | The deliberate gap: caught. Fixed test-first. |
+| 88effe66 `  feat: x` passes the check | High | code + `pr_knowledge` (PR 9, validate before normalizing) | Valid: `parseCommit()` trims the header. Human: fix in `check` only, parser to T-030. |
+| 731e5dee unknown option printed raw | Medium | code | Valid; fixed in `check`, other commands to T-031. |
+| 9ef963f7 U+034F and other rule-7 characters print raw | Medium | code + AGENTS.md | Valid; `oneLine()` now escapes rule 7's whole set. |
+| f6bbf647 third exception does not make the agent wait | Medium | AGENTS.md + FACTORY.md | Valid; human chose to require the go-ahead after the gate report. |
+
+What the source added: the one finding no code or rule could support (the skip lines) cites the
+issue, the explanation restates the criterion (as Qodo's own "Criterion 4802871"), and the
+PR body's "known gap" did not talk it out of the finding. What it did not show: which other
+criteria were checked against the issue; a finding that is absent says nothing either way.
+Compared with Day 11, where no PR 26 run cited issue #25 although the PR body said `Closes #25`,
+the difference today is not visible in the setup (same GitHub Issues route, `Closes #N` in both):
+one explanation is that issue #25's criteria were all met.
+
+Fix round (test-first, `evidence/day12/red-pr28-round1.txt`, 5 red): skip lines in stream order
+after the malformed lines, leading whitespace fails, the unknown option escaped, `oneLine()` on
+rule 7's set (`Default_Ignorable_Code_Point`, U+2800, U+FFFD, every space but U+0020). 316 tests.
