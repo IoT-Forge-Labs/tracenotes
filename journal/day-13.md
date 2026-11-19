@@ -159,3 +159,19 @@ and PR link), and JSON entries carry the PR number and link; the footer counts a
 step 1 pins the range to full SHAs; the error line escapes like `oneLine()`; null members are
 `RangeError`. 344 tests. The real history (76 commits, 57 lines) still audits PASS with the
 exact-line check. The two runs' evidence is in this commit, which also answers 2f938c17.
+
+Run 2's transcript (`evidence/day13/fresh-session-2.txt`, the whole session, so run 1 again; the
+same two `ls -l` lines redacted) confirms the refinement: step 3 printed `rev-list.txt` and
+`stream.bin` only. It also confirms the retry ran in run 1's session (the `/export` of run 1 sits
+between the two invocations). The range was still given as `3903f33`, not pinned: the pinning
+step (dc9d9e47) came after this run.
+
+Review of `73f8a1e` (run 2045927, extended, `review_complete: false` again;
+`evidence/day13/pr30-review-2-extended.json`): all eight earlier findings `implemented`,
+2f938c17 included (the evidence answered it). One new High, 91a3c1c4: the SKILL had the agent
+paste the caller's range and directory into single-quoted Bash assignments, so a quote in a value
+would end the string and run what follows. Valid. **PR gate: NOT MET**, the agreed stop. Human:
+fix it (SKILL text: a table of allowed characters per value; anything else stops and asks, never
+escaped or repaired), push, and the human decides the merge as a recorded exception if the review
+stays incomplete. Qodo has not produced a complete review on PR 30: both runs at extended depth
+ended `review_complete: false`.

@@ -25,13 +25,28 @@ and 2). It runs the CLI the way a user would, then `scripts/audit.ts` compares t
   notes under audit would only prove the notes agree with themselves (Qodo local review findings
   7af68d8b, 3cab7486).
 
+**Safe values only.** Every value is pasted into a single-quoted Bash assignment, so a quote in
+it would end the string and run whatever follows (PR 30 review, finding 91a3c1c4). Before step 1,
+check each value character by character and use it only if it has nothing outside these sets:
+
+| Value | Allowed characters |
+|---|---|
+| Range | letters, digits, `.` `_` `/` `~` `^` `-` (the `..` between endpoints is two dots) |
+| Output directory | letters, digits, `.` `_` `/` `-`; a relative path inside the repository, no `..` segment |
+| Repository URL | letters, digits, `.` `_` `/` `:` `-`, starting with `https://` |
+
+No quotes, spaces, `$`, backticks, `;`, `&`, `|`, `<`, `>`, `(`, `)`, `*`, `?`, `\`, newlines or
+non-ASCII characters. A value with any of them is not repaired or escaped: stop and ask the human
+to restate it. After step 1 the range is pasted as full SHAs, which are always safe.
+
 ## Project context
 
 - Work in the repository root (`dark_factory/`, where `package.json` is). The CLI is
   `node src/cli.ts`; no build step, no dependencies to install.
 - The log stream format is fixed: `git log --format='%H%x1f%an%x1f%aI%x1f%B%x1e' <range>`.
-- **Use Bash** (Git Bash on Windows, the Bash tool in Claude Code); the blocks need nothing beyond POSIX sh. Windows PowerShell 5.1
-  writes `>` redirects as UTF-16 with a byte order mark, which corrupts every file below.
+- **Use Bash** (Git Bash on Windows, the Bash tool in Claude Code); the blocks need nothing
+  beyond POSIX sh. Windows PowerShell 5.1 writes `>` redirects as UTF-16 with a byte order mark,
+  which corrupts every file below.
 - `check` exits 1 when a commit header is not conventional. That is the check's verdict on the
   history, **not** an audit failure; record it and go on.
 - Never print the origin remote itself: it can hold credentials. `render --origin` drops them.
@@ -40,6 +55,8 @@ and 2). It runs the CLI the way a user would, then `scripts/audit.ts` compares t
 
 - no range was given, it is ambiguous ("the last release" with no tag), or it is not one of the
   two forms above;
+- a range, output directory or repository URL has a character outside its allowed set (see
+  "Safe values only");
 - git cannot resolve an endpoint (`git rev-parse --verify` fails) or the range is empty;
 - the only shell available is PowerShell or cmd (no Bash);
 - `render --origin` fails (no origin, unreadable remote): report it; do not fall back to
