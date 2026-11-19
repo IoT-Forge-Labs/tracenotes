@@ -108,3 +108,54 @@ section, subject and scope; the range is one of two stated forms; the comment is
 The whole history (76 commits) still audits PASS. The pull request review is the next check on
 these fixes; the merge still needs the PR gate MET at its head. Ticket criteria 2 and 3 and
 issue #29 describe the stricter checks.
+
+## The fresh session (run 1)
+
+The human started a new Claude Code session in `dark_factory/` on the PR branch at `4ad7bdd`
+(none of this conversation in it), typed `/skills`, then `/release-notes-audit 3903f33`, and
+exported the transcript (`evidence/day13/fresh-session-1.txt`; the local account name in two
+`ls -l` lines is redacted to `<user> <group>`, nothing else changed).
+
+What the agent did, checked against the SKILL:
+- Loaded the skill: its first command is step 1, verbatim. (`/skills` opens a panel the export
+  does not capture: "No changes".)
+- Ran all six steps in order, **each block with its own literal `RANGE`, `OUT`, `REPO_URL`**: the
+  round-2 fix (285ab321) at work; without it the run would have written to `/rev-list.txt`.
+- Took the default output directory `evidence/audits/root-3903f33/`, correctly: the invocation
+  named none (the drafting session's instructions to the human said "output to
+  evidence/day13/audit-history" but left it out of the command line).
+- Treated `check`'s exit 1 as a finding about the history, listed the 3 non-conventional
+  headers, and warned that `stream.bin` holds author names before anything is committed.
+- Result: `audit: PASS`, five checks. Checked independently: all six saved outputs are
+  byte-identical to the drafting session's dry run of the same range, `git rev-list --count
+  3903f33` is 76, and the audit re-run on the saved folder passes.
+
+What it got wrong was the skill's, not the agent's: step 3's `ls -l` printed the local account
+name into evidence meant for a public repository (AGENTS.md hard rule: no personal data).
+Refined: step 3 lists names only, and says why.
+
+## The retry (run 2)
+
+After the refinement, the human asked the same session to run again with the output directory
+named: `evidence/day13/audit-history/`. It was the session of run 1, not a new one (it remembered
+run 1's `/export` going astray). It read the refined SKILL from disk and said so ("I followed that
+version"). Result: `audit: PASS`; all seven saved files are byte-identical to run 1's. One slip: it
+told the human the transcript was still at the stray path, from memory; the drafting session had
+already moved it. It reported a state without looking.
+
+## PR 30
+
+Review of `4ad7bdd` (run 2045835, extended, `review_complete: false`: incomplete, so it cannot
+carry the gate; `evidence/day13/pr30-review-1-extended.json`). Checks green. New, all valid:
+e1492647 (Medium, Security: a token in the stated URL was quoted in the error), 633aace6
+(Medium: text around the subject, or a wrong PR link, passed), be79ef1c (Medium: the Markdown
+footer was not checked), dc9d9e47 (Medium: a branch moving between steps changes the range),
+2a84cc4a and 9d61dab6 (Low: error-line escaping; null members threw TypeError). f9b538b4 shown
+`implemented`. Human: fix all in one round, then one more review, then stop.
+
+Fixed test-first (`red-pr30-round1.txt`, 6 red): the URL is never quoted; each Markdown line must
+equal, escapes removed, the exact line render writes for `group`'s entry (scope, subject, commit
+and PR link), and JSON entries carry the PR number and link; the footer counts are compared;
+step 1 pins the range to full SHAs; the error line escapes like `oneLine()`; null members are
+`RangeError`. 344 tests. The real history (76 commits, 57 lines) still audits PASS with the
+exact-line check. The two runs' evidence is in this commit, which also answers 2f938c17.

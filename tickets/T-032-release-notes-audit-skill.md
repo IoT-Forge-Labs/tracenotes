@@ -45,17 +45,19 @@ describes on the range `d8199fe..3903f33` (6 commits) and reading the code.
 3. Checks, each reported with what differed:
    - `exactly-once`: the SHAs in `group` (sections and ignored) equal the range's SHAs: none
      missing, none extra, none twice; no malformed record.
-   - `counts`: `group.total`, `notes.json` `counts.total` and `check`'s `checked <n>` equal the
-     range's size; `shown + ignored === total`; `malformed` is 0 everywhere.
+   - `counts`: `group.total`, `notes.json` `counts.total`, the Markdown footer and `check`'s
+     `checked <n>` equal the range's size; `shown + ignored === total`; the footer's shown, merge
+     and config counts match; `check`'s verdicts add up; `malformed` is 0 everywhere.
    - `json-links`: every entry's `commitUrl` is `<repoUrl>/commit/<its sha>`, its sha is in the
-     range, and entry k is `group`'s entry k: same commit, section, subject and scope (amended
-     after local review: sets of SHAs let entries trade links or text).
+     range, and entry k is `group`'s entry k: same commit, section, subject, scope and PR number,
+     with `prUrl` `<repoUrl>/pull/<n>` or null (amended after review: sets of SHAs let entries
+     trade links or text).
    - `markdown-links`: one `- ` line per shown entry; line k sits under `group`'s section
-     heading for entry k, shows its scope and subject (escapes removed) and has exactly one commit
-     link, `(<repoUrl>/commit/<its sha>)`.
+     heading for entry k and, with its escapes removed, is exactly the line render writes for it:
+     scope, subject, commit link and PR link, nothing else.
    - `check-agrees`: `check`'s `skip` lines name exactly `group`'s merge commits, and its summary
      counts match the `fail`, `malformed` and `skip` lines it printed.
-4. Input that cannot be read (a rev-list line that is not a 40-character lowercase SHA, JSON that
+4. Input that cannot be read (a null section or entry, Markdown without its footer, a rev-list line that is not a 40-character lowercase SHA, JSON that
    does not parse, a missing `checked` line, an empty range, a repository URL `checkRepoUrl()`
    rejects) throws `RangeError`; nothing is guessed.
 5. Entry: `node .claude/skills/release-notes-audit/scripts/audit.ts <dir> <repo-url>` reads the

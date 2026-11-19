@@ -64,10 +64,14 @@ paste the same literal values at the top of every later block.
    echo "commits: $(git rev-list --count "$RANGE")"
    git rev-parse HEAD; git status --short -- src tests .claude
    ```
-   Expected: no `UNRESOLVED` line and a count greater than 0. Stop otherwise. Note whether
-   `src/` has uncommitted changes: the audit then covers the working tree, not `HEAD`. Choose
-   `OUT` now: `evidence/audits/<from-short>-<to-short>` (short SHAs from `git rev-parse --short`)
-   unless the human named another directory.
+   Expected: no `UNRESOLVED` line and a count greater than 0. Stop otherwise. Each resolved
+   endpoint prints its full SHA. **From step 3 on, `RANGE` is written with those full SHAs**
+   (`<from-sha>..<to-sha>`, or `<rev-sha>`), not with the names given: a branch or tag that
+   moves between steps would otherwise change the range under the audit (PR 30 review, finding
+   dc9d9e47). Report the range both ways, as given and as pinned. Note whether `src/` has
+   uncommitted changes: the audit then covers the working tree, not `HEAD`. Choose `OUT` now:
+   `evidence/audits/<from-short>-<to-short>` (short SHAs from `git rev-parse --short`) unless the
+   human named another directory.
 2. **Create the output directory** (refuse a non-empty one).
    ```bash
    OUT='evidence/audits/<from-short>-<to-short>'
@@ -76,12 +80,13 @@ paste the same literal values at the top of every later block.
    Expected: `created ...`. On `NOT EMPTY`, stop.
 3. **Save the range and the stream.**
    ```bash
-   RANGE='<from>..<to>'; OUT='evidence/audits/<from-short>-<to-short>'
+   RANGE='<from-sha>..<to-sha>'; OUT='evidence/audits/<from-short>-<to-short>'   # the pinned range from step 1
    git rev-list "$RANGE" > "$OUT/rev-list.txt"
    git log --format='%H%x1f%an%x1f%aI%x1f%B%x1e' "$RANGE" > "$OUT/stream.bin"
-   echo "rev-list lines: $(wc -l < "$OUT/rev-list.txt")"; ls -l "$OUT"
+   echo "rev-list lines: $(wc -l < "$OUT/rev-list.txt")"; ls "$OUT"
    ```
-   Expected: the line count equals the count from step 1, and both files are in `$OUT`.
+   Expected: the line count equals the count from step 1, and both files are in `$OUT`. List names
+   only (`ls`, not `ls -l`): the long listing prints the local account name into the evidence.
 4. **Render every output from the same stream.**
    ```bash
    OUT='evidence/audits/<from-short>-<to-short>'
@@ -111,10 +116,10 @@ paste the same literal values at the top of every later block.
 | Check | Proves | Fails when |
 |---|---|---|
 | `exactly-once` | every commit of the range appears once in `group` (a section or ignored) and nothing else does | a commit is missing, extra or listed twice, or a record was malformed |
-| `counts` | `group`, `notes.json` and `check` count the range's size; `shown + ignored = total` | any count differs |
-| `json-links` | JSON entry k is `group`'s entry k: same commit, section, subject and scope, and its `commitUrl` is `<repo>/commit/<its sha>` | a link is wrong, an entry is not in the range, out of order, or under another section or subject |
-| `markdown-links` | Markdown entry line k is `group`'s entry k: under its section heading, with its scope and subject (escapes removed) and exactly one commit link, its own | a line has no link, two links, another commit's link, or the wrong heading, scope or subject |
-| `check-agrees` | `check` skips exactly the merge commits `group` ignores | a merge is not skipped, or a non-merge is |
+| `counts` | `group`, `notes.json`, the Markdown footer and `check` count the range's size; `shown + ignored = total`; the footer's shown, merge and config counts match; `check`'s verdicts add up | any count differs |
+| `json-links` | JSON entry k is `group`'s entry k: same commit, section, subject, scope and PR number; `commitUrl` is `<repo>/commit/<its sha>` and `prUrl` is `<repo>/pull/<n>` or null | a link is wrong, an entry is not in the range, out of order, or shows another section, subject, scope or PR |
+| `markdown-links` | Markdown entry line k, with its escapes removed, is exactly the line render writes for `group`'s entry k (scope, subject, commit link, PR link), under that entry's section heading | a line has no link, two links, another commit's link, extra text, or the wrong heading, scope, subject or PR link |
+| `check-agrees` | `check` skips exactly the merge commits `group` ignores, and its summary matches the lines it printed | a merge is not skipped, a non-merge is, or a summary count differs from its lines |
 
 ## Evidence saved
 

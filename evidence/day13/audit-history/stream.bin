@@ -1,0 +1,338 @@
+3903f33627c346f351672c4fcdaca584e15f5b37UBayouski2026-11-18T17:44:30-08:00Merge pull request #28 from UBayouski/t-009-check
+
+feat(check): lint commit headers in a git log stream (T-009)
+2142d2ae5719ffe810f2728734a4e0e4f15ff2acUladzislau Bayouski2026-11-18T17:25:05-08:00docs(journal): Day 12, PR 28 gate met, lesson
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+3bb2f6c54ce07dd086d827bab4b838b26f7fcbe8Uladzislau Bayouski2026-11-18T17:20:31-08:00fix(check): list skipped merges, fail leading whitespace, escape more (T-009)
+
+Qodo PR review on PR 28 (run 2045210):
+- 15aa08e5: print `skip <short sha> merge commit` lines (the Day 12
+  deliberate gap, criterion 3).
+- 88effe66: a header whose raw first line starts with whitespace fails;
+  the parser's trim itself is T-030 (human decision).
+- 731e5dee: the unknown option in check's usage error is escaped; other
+  commands are T-031.
+- 9ef963f7: oneLine() escapes the whole AGENTS.md rule 7 set.
+- f6bbf647: the third exception waits for the human's go-ahead after
+  the gate report.
+Test-first, 316 tests.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+ef866b218050e8a75200e49e2c21ad74f1a7d073Uladzislau Bayouski2026-11-18T17:09:06-08:00docs(backlog): T-009 done (PR 28)
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+d52ba6901d8324b7f0db5d5db0b063048a788836Uladzislau Bayouski2026-11-18T17:08:31-08:00feat(check): lint commit headers in a git log stream (T-009)
+
+`tracenotes check` reads the same stream as render and lists commits
+whose header is not Conventional Commits; merge commits are skipped and
+counted, unreadable records listed, exit 0/1/2. Headers and reasons are
+printed escaped (control, format and separator characters).
+
+Draft for the Day 12 experiment: criterion 3's skip lines are left out
+on purpose and fixed before merge. Also adds the AGENTS.md third
+exception (first commit by the agent when the human asks).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+d0b3721ad0bb46c3c6a21e8e8489f57f5baad95aUladzislau Bayouski2026-11-18T14:56:08-08:00Journl day 11 update
+
+d8199fe76a8c4d373f3e966d386338e264bf5796UBayouski2026-11-18T14:53:46-08:00Merge pull request #26 from UBayouski/t-010-repo-url
+
+feat(render): add --origin, link base from the origin remote without its credentials (T-010)
+50779493f268d3166ecdbeca2514ee27071c9b4aUladzislau Bayouski2026-11-18T14:49:08-08:00fix(origin): say which origin read failure happened, never git's output (T-010)
+
+Qodo PR review finding 56942752: every failure printed one fixed message,
+so git missing, a missing remote and other git errors looked alike. The
+message now carries only the error's code (ENOENT: git not found) and its
+integer exit status; anything else gets no detail. Test-first, 296 tests.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+e211fe7df7bd9dc7d3f4a7f4e1e5ae701047e32eUladzislau Bayouski2026-11-16T10:37:00-08:00docs(journal): Day 11, make the reviewer yours (PR 26 before/after)
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+272cc4777b72f1f0c3b6151b2642c0a205410e02Uladzislau Bayouski2026-11-16T10:32:05-08:00docs(review): keep the Day 11 review guidelines in .pr_agent.toml; evidence
+
+The issue and compliance guidelines tried on the repo wiki move into the
+repository file. Display keys and enable_incremental_review = false are
+not kept. Before/after comparison of PR 26 at 03d4a17 in
+evidence/day11/comparison.md.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+21bc1b1e2e3c167018d244463dd0791bcd37891eUladzislau Bayouski2026-11-16T10:32:04-08:00fix(origin): never run a git.exe from the working folder; isolate test git config (T-010)
+
+Qodo PR review of 03d4a17 (run 1993597):
+- 039c99ec: on Windows, Node looks up a bare program name in the current
+  directory before PATH. readOriginRemote() now sets
+  NoDefaultCurrentDirectoryInExePath before the spawn. Windows-only test
+  plants a fake git.exe; it failed before (links to evil/pwned), passes now.
+- cb45117f: the child-process tests now replace the caller's global and
+  system git config, so a url.*.insteadOf rule cannot change get-url.
+  Reproduced with a fake home .gitconfig; fails before, passes now.
+- 69a37c33: BACKLOG row for T-010 set to done (PR 26).
+
+npm run check: 293 tests pass.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+03d4a17d4ce6eca1f0a885181631b5653847e93eUladzislau Bayouski2026-11-16T10:08:24-08:00feat(render): add --origin, link base from the origin remote without its credentials (T-010)
+
+38c897839b1b1bf3e455e768a74f09d5ce2846c3Uladzislau Bayouski2026-11-13T10:47:27-08:00docs: correct FACTORY.md after review, README status for Day 10
+
+ef500c8c0f94eeb6cef188c6d047f0f954f6ad27Uladzislau Bayouski2026-11-13T10:45:47-08:00docs: correct FACTORY.md after review, README status for Day 10
+
+4d3062ec3d6c34e660e8af4499f85f5d4ddab515UBayouski2026-11-13T10:36:17-08:00Merge pull request #24 from UBayouski/t-028-source-hygiene
+
+test(hygiene): forbid raw invisible characters in TypeScript sources (T-028)
+a2ac51e5b823b81d1979894d42f7c5a85e835bd1Uladzislau Bayouski2026-11-13T10:28:58-08:00docs(factory): FACTORY.md, the path from a ticket to main with its gates
+
+The Day 10 diagram: lanes, gates with what must pass and the evidence,
+the stops and the human decisions, and a table of what T-028 actually
+went through. README links to it. Journal: PR 24 gate result. Markdown
+and evidence only.
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+
+85dffae575dc3440eeaf8cc23207e3755d4de50eUladzislau Bayouski2026-11-13T10:26:57-08:00fix(hygiene): show odd file names as escapes in the report (T-028)
+
+A .ts file name with a line feed, a control character or a direction
+mark could split or reorder the one-line report. showPath() replaces the
+characters the rule forbids, and tab and line feed, with the text of
+their escape; describeRawInvisible, sourceProblems and the read-error
+line use it (Qodo PR review finding 9fb45c26).
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+
+bb6c03ebfdc6c95a2c08b846ebfdf7c2430642a7Uladzislau Bayouski2026-11-13T10:23:06-08:00docs(backlog): mark T-028 done (PR 24)
+
+The ticket-link check needs the pull request number in the row, and the
+number exists only once the pull request is open.
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+
+3b09408388dcf62d0e2db238c1366215e4da0867Uladzislau Bayouski2026-11-13T10:21:10-08:00test(hygiene): forbid raw invisible characters in TypeScript sources (T-028)
+
+09c698fe27226c71c1b6f0c9b194496cbf696462UBayouski2026-11-13T09:52:46-08:00Merge pull request #22 from UBayouski/day-10-required-checks
+
+ci: required checks, ticket-link check and ticket guard (Day 10)
+e286eb930d8f256ed22e249c1a85a0e7092bfc09Uladzislau Bayouski2026-11-13T09:47:52-08:00fix(ci): resolve the three informational findings on PR 22
+
+- ticket guard: a backtick fence cannot have a backtick after its opening
+  run, so an inline triple-backtick span no longer hides the ticket
+  (641e42e4)
+- ticket guard: an Investigation written as a heading may hold
+  sub-headings and bold phrases; it ends at a heading of the same or a
+  higher level (c51f36de)
+- ticket-link: a ticket in the title that another pull request already
+  finished is a mention, not a claim, unless the pull request closes its
+  issue (d2451e51)
+
+Fixed on the owner's decision; the gate leaves informational findings to
+the human. AGENTS.md and the journal updated to match.
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+
+9019690b272f4baeccbd5a73538801b12d9ba7e8Uladzislau Bayouski2026-11-13T09:39:52-08:00docs(journal): record the PR 22 gate result and the dismissals
+
+Review at 435b12e: four findings implemented, four dismissed on the
+owner's decision, three informational reported. Markdown and evidence
+only.
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+
+435b12e842d9a18ce3d85d5fee25b9907b069604Uladzislau Bayouski2026-11-13T09:36:51-08:00fix(ci): resolve the PR 22 review findings on the ticket checks
+
+- tests: pr-ticket-check reads a backlog fixture, not the live BACKLOG.md
+  (b6787850)
+- ticket-link: check out the pull request's head commit, so BACKLOG.md is
+  the one the pull request carries (8f27403d)
+- agent-ticket: the guard reads the current issue body, not the body from
+  the label event (842081ab)
+- agent-ticket: a guard that fails to run is reported as a tooling error;
+  the label stays and nothing is posted on the issue (b791ae9e)
+
+The guard step was run locally against stand-in gh and node commands
+(evidence/day10/guard-step-simulation.txt). Journal: PR 22 gate report.
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+
+1433e3d4863bf0e2571ba2cea7925bbb82266497Uladzislau Bayouski2026-11-13T09:25:36-08:00ci: required checks, ticket-link check and ticket guard (Day 10)
+
+6dc9a90e17e8b454f24bdb685db76b20c48b19b8Uladzislau Bayouski2026-11-12T12:48:47-08:00docs: add T-028 source hygiene to the backlog
+
+05ab5f192ec5d448a63665ec323f00671b28d8b6Uladzislau Bayouski2026-11-12T12:47:51-08:00Updating on journal entries
+
+138b35e3736e2668fe2f010fc82dfa7b66a6c98bUBayouski2026-11-12T12:18:59-08:00Merge pull request #21 from UBayouski/t-008-config-ignore
+
+feat(config): add --config with ignore patterns and a quality gate (T-008) (#20)
+ca9f87e925a30d1cc538cff2080c6191f4ddc7feUladzislau Bayouski2026-11-12T12:16:44-08:00docs(gate): count a skipped review for docs-only commits, record the PR 21 result
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+
+f3dc67b1f6b35e657dccd4e338b99927c2d57a58Uladzislau Bayouski2026-11-12T12:07:26-08:00docs(agents): let the agent act on its own on an open PR, stop on any question
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+
+e3684e441398c91cd8bf16a211137720b35005bfUladzislau Bayouski2026-11-12T12:02:27-08:00PR commit to resolve issue
+
+931d447b6d21646af4427a63d90a079332253129Uladzislau Bayouski2026-11-12T11:56:27-08:00fix(config): escape the config path in error lines (T-008) (#20)
+
+Qodo PR review finding fa44bb08: JSON.stringify leaves DEL, C1 controls, U+2028 and U+2029 raw, so the quoted path now goes through oneLine() as well.
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+
+501f9838e2321b5e616b8a2d4d34d2bcf85897c0Uladzislau Bayouski2026-11-12T10:29:33-08:00feat(config): add --config with ignore patterns and a quality gate (T-008) (#20)
+
+280c2fd2f3d5123ffdea0a2cadb7c184688c6c9aUladzislau Bayouski2026-11-11T11:26:04-08:00docs: Day 8 journal merge note and post link
+
+7a1d606f87b01c1bc8674d54af92190c783df311UBayouski2026-11-11T11:07:01-08:00feat(render): add JSON output with --format json (T-007) (#19)
+
+* - feat(render): add JSON output with --format json (T-007)
+     - docs: Day 8 journal and Qodo local review evidence
+
+* Day 8 changes
+25903fb23322e41386ea52167494dba82d9375e5Uladzislau Bayouski2026-11-10T10:23:03-08:00docs: link Day 7 post in journal
+
+b6ea01f95e13281e11e01a43d08c775d5981e236UBayouski2026-11-10T10:21:29-08:00Merge pull request #17 from UBayouski/agent/issue-15-t-005-recommend-the-next-version
+
+docs: Day 7 journal and Review Resolver evidence
+3576d568f7bfbbab5bbeefc0c9a2cbc287bcab8dUladzislau Bayouski2026-11-10T10:20:45-08:00docs: T-005 done; Day 7 journal merge note
+
+5f14bc78666d383e1e6a3d6ac76d9d43fed030f1UBayouski2026-11-10T10:17:28-08:00Merge pull request #16 from UBayouski/agent/issue-15-t-005-recommend-the-next-version
+
+feat(version): recommend the next version with the rule that produced it (#15)
+9a70ea37cde50664439956d86e97d43b64493562Uladzislau Bayouski2026-11-10T10:16:51-08:00docs: Day 7 journal and Review Resolver evidence for PR 16
+
+3e538a2c2c057964f010b4b28eb5e0020a1daac9Uladzislau Bayouski2026-11-10T10:08:17-08:00test(version): pin trigger order to render's section order; amend T-005 criterion 4 (Qodo PR 16)
+
+b2910fecf52231fa7e2d8da34a182a085a5681d4claude[bot]2026-11-10T17:59:02Zfeat(version): recommend the next version with the rule that produced it (#15)
+
+Co-authored-by: UBayouski <24280469+UBayouski@users.noreply.github.com>
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+
+04b761142b561a6804532c9ce011edee95698c9cUladzislau Bayouski2026-11-09T09:45:25-08:00docs: Day 6 journal, T-004 ticket and Codebase Wisdom evidence; T-004 done
+
+05bc8cb42ccef1052e3fcafa2a49b3716de2f78fUBayouski2026-11-09T09:42:11-08:00Merge pull request #14 from UBayouski/agent/issue-13-t-004-render-markdown-notes-with
+
+feat(render): render Markdown notes with a source link on every entry (#13)
+eb0dce77ec906edb7556cc65ce945f9a864e3511claude[bot]2026-11-09T17:40:28Zfix(render): validate repo URL port and up front, show usage on empty stdin, reject unsafe PR numbers (Qodo PR 14)
+
+Co-authored-by: UBayouski <24280469+UBayouski@users.noreply.github.com>
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+
+7f7af10857fe20a1c0b42d245e5a7d4871e320c3claude[bot]2026-11-09T17:35:42Zfeat(render): render Markdown notes with a source link on every entry (#13)
+
+Co-authored-by: UBayouski <24280469+UBayouski@users.noreply.github.com>
+
+7d24cb136aab8907f995d155cea555bbe932e99dUladzislau Bayouski2026-11-06T10:34:37-08:00Merge branch 'day-05-addendum'
+
+100c4904b9ecbbdd34081c7dedd5b13561597a2aUladzislau Bayouski2026-11-06T10:32:23-08:00docs: Day 5 addendum, T-003 via the factory; T-003 and T-026 done in backlog
+
+76ca0e77e82ed87fb4660b8812bad92aa6f15720UBayouski2026-11-06T10:31:48-08:00Merge pull request #12 from UBayouski/agent/issue-11-t-003-group-commits-into-release-note
+
+feat(group): group commits into release-note sections (#11)
+49c8632878e2d34547e0ae58d2a7d5876baba78dclaude[bot]2026-11-06T18:23:25Ztest(group): pin that an indented Merge header is not ignored (Qodo PR 12)
+
+Co-authored-by: UBayouski <24280469+UBayouski@users.noreply.github.com>
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+
+d3b0d315f0dac49c17f7ef0d988fc8aae225f41cclaude[bot]2026-11-06T18:19:12Zfeat(group): group commits into release-note sections (#11)
+
+d5d16d500bccb1bf3802175410c19585341a89f9UBayouski2026-11-06T10:16:48-08:00Merge pull request #10 from UBayouski/day-05-journal
+
+docs: Day 5 journal, import result and rule id
+89f9bc4149b996bdc96198d46b93583fbedff847Uladzislau Bayouski2026-11-06T10:13:31-08:00docs: Day 5 journal, import result and rule id
+
+02ce479c6195897243a7d0693053947b3429452aUBayouski2026-11-06T10:08:26-08:00Merge pull request #9 from UBayouski/day-05-rule
+
+docs(agents): rule 6 Validate Before You Normalize, from review history (Day 5)
+190db54db339835910085338797c6cc2f696e1fdUladzislau Bayouski2026-11-06T10:04:23-08:00docs(agents): rule 6 lists all existing framing; workflows push without per-push approval (Qodo PR 9)
+
+e12a5994f2a0b0e19a5a042f65ef9a5bb495f993Uladzislau Bayouski2026-11-06T10:00:56-08:00docs(agents): rule 6 Validate Before You Normalize from review history; push needs explicit approval (Day 5)
+
+a23048d6c89fa76ef4f9731493588758ac68515bUBayouski2026-11-05T11:48:45-08:00Merge pull request #8 from UBayouski/day-04-journal
+
+docs: Day 4 journal; let Qodo review bot pushes on agent branches
+91d3e81770851f3a25a00ab21b89a68cddb78ecfUladzislau Bayouski2026-11-05T11:47:53-08:00docs(review): set ignore_bot_pr in both sections; record the guard test
+
+200e023829b33fb0c90806e59e8bc56a0adf562dUladzislau Bayouski2026-11-05T10:43:46-08:00docs: Day 4 journal; let Qodo review bot pushes on agent branches
+
+f6eda5c476444eff90b4a29eff7af6aff94a119aUBayouski2026-11-05T10:41:55-08:00Merge pull request #7 from UBayouski/agent/issue-4-t-026-print-usage-instead-of
+
+fix(cli): print usage when stdin is a terminal (#4)
+4ee70d041cf521dafffb7e97f440cee294fca5f1claude[bot]2026-11-05T18:27:02Zrefactor(cli): inject stdout/stderr sinks so tests stop patching process streams (#4)
+
+Co-authored-by: UBayouski <24280469+UBayouski@users.noreply.github.com>
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+
+8a5c41a3dc576ab090c78ff5f84cdf6e53cc56ebclaude[bot]2026-11-05T18:12:18Zfix(cli): print usage when stdin is a terminal (#4)
+
+Co-authored-by: UBayouski <24280469+UBayouski@users.noreply.github.com>
+
+4271bad44549e51c744dd859754decd86b4f13d4UBayouski2026-11-05T10:10:51-08:00Merge pull request #6 from UBayouski/day-04-tag-mode
+
+ci(agent-ticket): force tag mode with track_progress so the agent get…
+2a74c314bb8cfe41b9d95b00945f12830b9257cdUladzislau Bayouski2026-11-05T10:06:15-08:00ci(agent-ticket): force tag mode with track_progress so the agent gets the issue, a branch, and git
+
+1fc26e7ce01f5b499911e9541cac35d511aeedb6UBayouski2026-11-05T08:45:24-08:00Merge pull request #5 from UBayouski/day-04-agent-trigger
+
+ci: label-triggered agent workflow, T-026 ticket, bot-commit exceptio…
+f9880ec9ccf491bb0fe5cc2fce4e32a6e2d03132Uladzislau Bayouski2026-11-05T08:43:39-08:00ci(agent-fix): only push fixes to agent/* branches; no AI trailers on human commits
+
+71fb0c848f93d9325d10d995374780dac3169d09Uladzislau Bayouski2026-11-05T08:36:52-08:00ci: label-triggered agent workflow, T-026 ticket, bot-commit exception on agent/* (Day 4)
+
+  Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>
+
+1fe2aae8b4cf11ddccd5b13242fda076f0f824d2UBayouski2026-11-04T18:55:47-08:00Merge pull request #3 from UBayouski/day-03-git-log-stream
+
+feat: parse git log streams from stdin (T-002)
+f8e9b11aa21d3b2bf8a3d4016ac376f7ff05d89fUladzislau Bayouski2026-11-04T18:53:35-08:00fix(gitlog): report junk before the SHA as malformed; strip PowerShell BOM
+
+Qodo review finding: stripping all leading whitespace let a space- or
+  tab-prefixed hash pass SHA validation. Only framing newlines are removed
+  now. Narrowing the strip exposed that PowerShell 5.1 prepends a UTF-8 BOM
+  to piped streams, which the old \s strip had been hiding; the BOM is now
+  removed once per stream and documented. Two tests added.
+
+db554e520a47d3d14553640df0d02142fc412950Uladzislau Bayouski2026-11-04T18:45:25-08:00feat: parse git log streams from stdin (T-002)
+
+Adds parseGitLog and the 'tracenotes log' command. Input is the
+  git log --format='%H%x1f%an%x1f%aI%x1f%B%x1e' stream. Invalid SHAs and
+  short records go to a malformed list with a reason; count always equals
+  commits + malformed. Dates stay strings with an ISO 8601 shape warning.
+  Fixtures are marked binary so the LF policy leaves control bytes alone.
+
+aa6dc6485e7d88617a540c110733688c4dd940a2UBayouski2026-11-04T18:36:28-08:00Merge pull request #2 from UBayouski/day-02-agents-md
+
+docs: add AGENTS.md factory rules, Day 1 journal, and LF line-ending …
+fa5e41ab7f80562b881d19e470ae4da4b559c05bUladzislau Bayouski2026-11-04T18:33:14-08:00docs: require child-process CLI tests in AGENTS.md; record PR 2 review
+
+Qodo review finding: the Day 1 journal promised a CLI coverage rule that
+  AGENTS.md did not contain. Adds the convention under code conventions.
+  The second finding (CRLF files left mixed) was verified as a false positive:
+  git ls-files --eol shows every tracked file as LF in the index.
+
+3af11aadac003837acea5bc9c26023c09cf2a614Uladzislau Bayouski2026-11-04T18:24:00-08:00docs: add AGENTS.md factory rules, Day 1 journal, and LF line-ending policy
+
+b40e806b100c5a4dec495e5abb9edf2a7ebcbd05UBayouski2026-11-04T18:22:23-08:00Merge pull request #1 from UBayouski/day-01-parse-commit
+
+feat: parse Conventional Commits messages (T-001)
+3450ffa6a211640cf8183c4a5d4981f5cf5677e5Uladzislau Bayouski2026-11-04T18:15:42-08:00fix: address Qodo review findings on T-001
+
+  - cli: detect direct invocation with pathToFileURL; the hand-built file:///
+    prefix never matched on POSIX, so main() silently did not run
+  - parser: keep leading indentation inside body paragraphs
+  - parser: reject whitespace-only or space-padded scopes as non-conventional
+  - tests: add child-process CLI tests and scope/indentation cases (33 total)
+
+81eb4479a880cc19b2b493e4c3a472d9b84a89d2Uladzislau Bayouski2026-11-04T17:51:22-08:00feat: parse Conventional Commits messages (T-001)
+
+3e332b16354c76311078c4b9cb294c9cbf1af636Uladzislau Bayouski2026-11-04T17:37:04-08:00chore: project scaffold, backlog, tickets, and journal
+

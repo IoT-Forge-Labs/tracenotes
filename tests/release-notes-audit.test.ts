@@ -208,6 +208,40 @@ describe('auditNotes (T-032)', () => {
     assert.deepEqual(failed(noSkip), ['check-agrees']);
   });
 
+  // PR 30 review, finding 633aace6: each Markdown line must be exactly the expected line, and the
+  // JSON PR link must match too; extra text or a wrong PR link is a wrong note.
+  test('extra text on a Markdown line, or a wrong PR link, fails (finding 633aace6)', async () => {
+    const extra = await inputsFor(commits);
+    extra.notesMarkdown = extra.notesMarkdown.replace('add check (', 'add check, and more (');
+    assert.deepEqual(failed(extra), ['markdown-links']);
+    const after = await inputsFor(commits);
+    after.notesMarkdown = after.notesMarkdown.replace(`/pull/28))`, `/pull/28)) trailing`);
+    assert.deepEqual(failed(after), ['markdown-links']);
+    const pr = await inputsFor(commits);
+    pr.notesMarkdown = pr.notesMarkdown.replace(`[#28](${repoUrl}/pull/28)`, `[#29](${repoUrl}/pull/29)`);
+    assert.deepEqual(failed(pr), ['markdown-links']);
+    const json = await inputsFor(commits);
+    json.notesJson = json.notesJson.replace(`"${repoUrl}/pull/28"`, '"https://example.com/o/r/pull/28"');
+    assert.deepEqual(failed(json), ['json-links']);
+  });
+
+  // PR 30 review, finding be79ef1c: the Markdown footer's counts must agree too.
+  test('a Markdown footer with a wrong count fails counts (finding be79ef1c)', async () => {
+    const input = await inputsFor(commits);
+    assert.match(input.notesMarkdown, /_4 of 5 commits shown; 1 merge commits ignored; 0 malformed records skipped\._/);
+    input.notesMarkdown = input.notesMarkdown.replace('1 merge commits ignored', '0 merge commits ignored');
+    assert.deepEqual(failed(input), ['counts']);
+  });
+
+  // PR 30 review, finding e1492647: a rejected URL may carry credentials; it is never quoted.
+  test('a rejected repository URL is not quoted in the error (finding e1492647)', async () => {
+    const good = await inputsFor(commits);
+    assert.throws(
+      () => auditNotes({ ...good, repoUrl: 'https://user:SECRET@github.com/o/r' }),
+      (error: unknown) => error instanceof RangeError && !error.message.includes('SECRET') && !error.message.includes('user'),
+    );
+  });
+
   test('unreadable input throws RangeError, nothing is guessed (criterion 4)', async () => {
     const good = await inputsFor(commits);
     const cases: Partial<AuditInput>[] = [
@@ -218,6 +252,12 @@ describe('auditNotes (T-032)', () => {
       { notesJson: 'not json' },
       { check: 'fail x\n' },
       { repoUrl: 'https://github.com/o/r/' },
+      // PR 30 review, finding 9d61dab6: null members are input errors, not script crashes.
+      { group: '{"sections":[null],"ignored":[],"malformed":[],"total":0}' },
+      { group: '{"sections":[{"title":"Features","entries":[null]}],"ignored":[],"malformed":[],"total":0}' },
+      { notesJson: '{"sections":[{"title":"Features","entries":[null]}],"counts":{"shown":0,"total":0,"ignored":0,"malformed":0}}' },
+      // be79ef1c: notes without the footer cannot be checked.
+      { notesMarkdown: '## Unreleased\n' },
     ];
     for (const change of cases) {
       assert.throws(() => auditNotes({ ...good, ...change }), RangeError, JSON.stringify(change));
@@ -271,5 +311,24 @@ describe('release-notes-audit entry as a child process (criterion 5)', () => {
       assert.equal(stdout, '');
       assert.match(stderr, /^error: [^\n]+\n$/);
     }
+  });
+
+  // PR 30 review, finding 2a84cc4a: the error line escapes what JSON leaves raw.
+  test('an error message with a bidi override or a line separator stays one escaped line (finding 2a84cc4a)', async () => {
+    const dir = mkdtempSync(path.join(base, 'bidi-'));
+    const odd = [String.fromCodePoint(0x202e), String.fromCodePoint(0x2028), String.fromCodePoint(0x85)];
+    write(dir, { ...(await inputsFor(commits)), revList: `ab${odd.join('')}cd\n` });
+    const { code, stderr } = runScript([dir, repoUrl]);
+    assert.equal(code, 2);
+    for (const ch of odd) assert.ok(!stderr.includes(ch), JSON.stringify(stderr));
+    assert.ok(stderr.includes('ab' + ['202e', '2028', '0085'].map(c => String.fromCharCode(92) + 'u' + c).join('') + 'cd'), stderr);
+  });
+
+  test('a rejected repository URL is not printed by the entry either (finding e1492647)', async () => {
+    const dir = mkdtempSync(path.join(base, 'token-'));
+    write(dir, await inputsFor(commits));
+    const { code, stderr } = runScript([dir, 'https://user:SECRET@github.com/o/r']);
+    assert.equal(code, 2);
+    assert.ok(!stderr.includes('SECRET'), stderr);
   });
 });

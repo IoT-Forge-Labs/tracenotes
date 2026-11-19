@@ -1,0 +1,6 @@
+PASS exactly-once: 76 commits in the range, 76 in the notes; missing: none; extra: none; twice: none; malformed records: 0
+PASS counts: group, notes.json and check all count 76
+PASS json-links: 57 entries (shown 57); wrong link: none; not in range: none; not in group: none; group entry missing: none; not in group's order: none; wrong section, subject or scope: none
+PASS markdown-links: 57 entry lines (shown 57); lines without exactly one commit link: 0; entry not linked: none; unexpected link: none; not in group's order: none; wrong heading, subject or scope: none
+PASS check-agrees: 19 merge commits in group, 19 skip lines in check; not skipped: none; unexpected skip: none; summary vs lines: agree
+audit: PASS

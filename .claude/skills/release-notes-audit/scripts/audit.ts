@@ -83,10 +83,18 @@ function duplicates(a: string[]): string[] {
  *          when all hold. Pure.
  * @throws RangeError when an input cannot be read: a rev-list line that is not a full lowercase
  *         SHA, an empty range, JSON that does not parse or lacks a field, no `checked <n>:` line in
- *         the check output, or a repository URL `checkRepoUrl()` rejects. Nothing is guessed.
+ *         the check output, no footer in the Markdown, or a repository URL `checkRepoUrl()` rejects
+ *         (the URL is never quoted). Nothing is guessed.
  */
 export function auditNotes(input: AuditInput): AuditResult {
-  checkRepoUrl(input.repoUrl);
+  try {
+    checkRepoUrl(input.repoUrl);
+  } catch (error) {
+    // checkRepoUrl quotes the value, and a URL may carry credentials (PR 30 review, finding
+    // e1492647): the message names the expected shape only.
+    if (error instanceof RangeError) throw new RangeError('the repository URL is not https://<host>/<owner>/<repo> (the value is not shown: it may hold credentials)');
+    throw error;
+  }
   const lines = input.revList.split('\n');
   if (lines.at(-1) === '') lines.pop();
   for (const line of lines) {
@@ -101,12 +109,15 @@ export function auditNotes(input: AuditInput): AuditResult {
   const sections = field<unknown[]>(group, 'sections', 'group.json', 'array');
   // group's entries in order, each with its section title, subject and scope: what the notes must show.
   const expected = sections.flatMap(s => {
+    if (typeof s !== 'object' || s === null) throw new RangeError('group.json: a section is not an object');
     const title = (s as { title?: unknown }).title;
     if (typeof title !== 'string') throw new RangeError('group.json: a section has no title');
     return field<unknown[]>(s, 'entries', 'group.json', 'array').map(e => {
-      const { subject, scope } = e as { subject?: unknown; scope?: unknown };
+      if (typeof e !== 'object' || e === null) throw new RangeError('group.json: an entry is not an object');
+      const { subject, scope, prNumber } = e as { subject?: unknown; scope?: unknown; prNumber?: unknown };
       if (typeof subject !== 'string' || (scope !== null && typeof scope !== 'string')) throw new RangeError('group.json: an entry has no subject or scope');
-      return { title, sha: shaOf(e, 'group.json'), subject, scope };
+      if (prNumber !== null && !Number.isSafeInteger(prNumber)) throw new RangeError('group.json: an entry has an invalid prNumber');
+      return { title, sha: shaOf(e, 'group.json'), subject, scope, prNumber: prNumber as number | null };
     });
   });
   const sectionShas = expected.map(e => e.sha);
@@ -121,18 +132,34 @@ export function auditNotes(input: AuditInput): AuditResult {
   const [shown, total, ignoredCount, malformed] = (['shown', 'total', 'ignored', 'malformed'] as const).map(k =>
     field<number>(counts, k, 'notes.json counts', 'number'),
   ) as [number, number, number, number];
-  const entries = field<unknown[]>(notes, 'sections', 'notes.json', 'array').flatMap(s =>
-    field<unknown[]>(s, 'entries', 'notes.json', 'array').map(e => {
+  const entries = field<unknown[]>(notes, 'sections', 'notes.json', 'array').flatMap(s => {
+    if (typeof s !== 'object' || s === null) throw new RangeError('notes.json: a section is not an object');
+    return field<unknown[]>(s, 'entries', 'notes.json', 'array').map(e => {
+      if (typeof e !== 'object' || e === null) throw new RangeError('notes.json: an entry is not an object');
       const source = field<Record<string, unknown>>(e, 'source', 'notes.json', 'object');
       const { subject, scope } = e as { subject?: unknown; scope?: unknown };
-      return { title: (s as { title?: unknown }).title, subject, scope, sha: shaOf(source, 'notes.json'), commitUrl: source['commitUrl'] };
-    }),
-  );
+      return {
+        title: (s as { title?: unknown }).title,
+        subject,
+        scope,
+        sha: shaOf(source, 'notes.json'),
+        commitUrl: source['commitUrl'],
+        prNumber: source['prNumber'],
+        prUrl: source['prUrl'],
+      };
+    });
+  });
 
   const summary = /^checked (\d+): (\d+) passed, (\d+) failed, (\d+) skipped, (\d+) malformed$/m.exec(input.check);
   if (summary === null) throw new RangeError('check.txt has no "checked <n>: ..." summary line');
   const [checkTotal, checkPassed, checkFailed, checkSkipped, checkMalformed] = summary.slice(1).map(Number) as [number, number, number, number, number];
   const skipShorts = [...input.check.matchAll(/^skip ([0-9a-f]{7}) merge commit$/gm)].map(m => m[1]!);
+
+  // The Markdown footer (render: `_<shown> of <total> commits shown; <m> merge commits ignored;
+  // [<c> ignored by config; ]<k> malformed records skipped._`), compared below (finding be79ef1c).
+  const footer = /^_(\d+) of (\d+) commits shown; (\d+) merge commits ignored; (?:(\d+) ignored by config; )?(\d+) malformed records skipped\._$/m.exec(input.notesMarkdown);
+  if (footer === null) throw new RangeError('notes.md has no "_<shown> of <total> commits shown; ..._" footer');
+  const [fShown, fTotal, fMerges, fConfig, fMalformed] = footer.slice(1).map(v => (v === undefined ? 0 : Number(v))) as [number, number, number, number, number];
 
   const checks: AuditCheck[] = [];
 
@@ -155,6 +182,10 @@ export function auditNotes(input: AuditInput): AuditResult {
   if (malformed !== 0) countProblems.push(`notes.json malformed ${malformed}`);
   if (checkTotal !== n) countProblems.push(`check checked ${checkTotal}`);
   if (checkMalformed !== 0) countProblems.push(`check malformed ${checkMalformed}`);
+  const mergeCount = mergeShas.length;
+  if (fShown !== shown || fTotal !== n || fMerges !== mergeCount || fConfig !== ignored.length - mergeCount || fMalformed !== 0) {
+    countProblems.push(`notes.md footer says ${fShown} shown of ${fTotal}, ${fMerges} merges, ${fConfig} by config, ${fMalformed} malformed; expected ${shown} of ${n}, ${mergeCount}, ${ignored.length - mergeCount}, 0`);
+  }
   // Qodo local review finding 4f944bf8: check's own verdicts must add up to its total.
   if (checkPassed + checkFailed + checkSkipped + checkMalformed !== checkTotal) {
     countProblems.push(`check passed ${checkPassed} + failed ${checkFailed} + skipped ${checkSkipped} + malformed ${checkMalformed} is not checked ${checkTotal}`);
@@ -178,12 +209,13 @@ export function auditNotes(input: AuditInput): AuditResult {
   // subject and scope for entry k; the right link next to the wrong text is a wrong note.
   const wrongContent = entries.flatMap((e, k) => {
     const x = expected[k];
-    return x !== undefined && e.sha === x.sha && (e.title !== x.title || e.subject !== x.subject || e.scope !== x.scope) ? [e.sha] : [];
+    const prUrl = x === undefined || x.prNumber === null ? null : `${input.repoUrl}/pull/${x.prNumber}`;
+    return x !== undefined && e.sha === x.sha && (e.title !== x.title || e.subject !== x.subject || e.scope !== x.scope || e.prNumber !== x.prNumber || e.prUrl !== prUrl) ? [e.sha] : [];
   });
   checks.push({
     id: 'json-links',
     ok: wrongLink.length === 0 && outside.length === 0 && notInGroup.length === 0 && notInNotes.length === 0 && outOfPlace.length === 0 && wrongContent.length === 0 && entries.length === shown,
-    detail: `${entries.length} entries (shown ${shown}); wrong link: ${list(wrongLink)}; not in range: ${list(outside)}; not in group: ${list(notInGroup)}; group entry missing: ${list(notInNotes)}; not in group's order: ${list(outOfPlace)}; wrong section, subject or scope: ${list(wrongContent)}`,
+    detail: `${entries.length} entries (shown ${shown}); wrong link: ${list(wrongLink)}; not in range: ${list(outside)}; not in group: ${list(notInGroup)}; group entry missing: ${list(notInNotes)}; not in group's order: ${list(outOfPlace)}; wrong section, subject, scope or PR link: ${list(wrongContent)}`,
   });
 
   // markdown-links: one "- " line per shown entry, each with exactly one commit link of its own.
@@ -213,13 +245,15 @@ export function auditNotes(input: AuditInput): AuditResult {
   const mdWrongContent = placedLines.flatMap((p, k) => {
     const x = expected[k];
     if (x === undefined || linked[k]!.length !== 1 || linked[k]![0] !== x.sha) return [];
-    const text = `- ${x.scope === null ? '' : `**${x.scope}:** `}${x.subject} (`;
-    return p.title !== x.title || !unescape(p.line).startsWith(text) ? [x.sha] : [];
+    // PR 30 review, finding 633aace6: the whole line, not its start; render's exact form.
+    const pr = x.prNumber === null ? '' : `, [#${x.prNumber}](${input.repoUrl}/pull/${x.prNumber})`;
+    const text = `- ${x.scope === null ? '' : `**${x.scope}:** `}${x.subject} ([${short(x.sha)}](${input.repoUrl}/commit/${x.sha})${pr})`;
+    return p.title !== x.title || unescape(p.line) !== text ? [x.sha] : [];
   });
   checks.push({
     id: 'markdown-links',
     ok: entryLines.length === shown && badLines === 0 && mdMissing.length === 0 && mdExtra.length === 0 && mdOutOfPlace.length === 0 && mdWrongContent.length === 0,
-    detail: `${entryLines.length} entry lines (shown ${shown}); lines without exactly one commit link: ${badLines}; entry not linked: ${list(mdMissing)}; unexpected link: ${list(mdExtra)}; not in group's order: ${list(mdOutOfPlace)}; wrong heading, subject or scope: ${list(mdWrongContent)}`,
+    detail: `${entryLines.length} entry lines (shown ${shown}); lines without exactly one commit link: ${badLines}; entry not linked: ${list(mdMissing)}; unexpected link: ${list(mdExtra)}; not in group's order: ${list(mdOutOfPlace)}; not the expected line (heading, scope, subject, links): ${list(mdWrongContent)}`,
   });
 
   // check-agrees: check skips exactly group's merge commits.
@@ -246,6 +280,20 @@ export function auditNotes(input: AuditInput): AuditResult {
   });
 
   return { checks, passed: checks.every(c => c.ok) };
+}
+
+/**
+ * One line of text with nothing a reader cannot see: JSON escapes for C0 controls, quotes and
+ * backslashes, then a `\uXXXX` escape for what JSON leaves raw (C1, format characters, odd
+ * spaces, line separators, characters displayed as nothing, U+2800, U+FFFD), the set src/cli.ts
+ * oneLine() escapes (PR 30 review, finding 2a84cc4a).
+ */
+function escapeLine(text: string): string {
+  return JSON.stringify(text)
+    .slice(1, -1)
+    .replace(/(?! )[\p{Cc}\p{Cf}\p{Zl}\p{Zp}\p{Zs}\p{Default_Ignorable_Code_Point}\u2800\ufffd]/gu, ch =>
+      [...Array(ch.length).keys()].map(i => `\\u${ch.charCodeAt(i).toString(16).padStart(4, '0')}`).join(''),
+    );
 }
 
 export interface RunResult {
@@ -282,7 +330,7 @@ export function run(args: string[]): RunResult {
     return { code: result.passed ? 0 : 1, stdout: text, stderr: '' };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { code: 2, stdout: '', stderr: `error: ${JSON.stringify(message).slice(1, -1)}\n` };
+    return { code: 2, stdout: '', stderr: `error: ${escapeLine(message)}\n` };
   }
 }
 
