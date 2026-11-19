@@ -1,0 +1,7 @@
+  ✖ a quoted key with an escape is reported (finding 5fa32f55) (0.7339ms)
+✖ a quoted key with an escape is reported (finding 5fa32f55) (0.7339ms)
+✖ failing tests:
+✖ unpinnedUses (3.9808ms)
+ℹ fail 1
+ℹ pass 8
+ℹ tests 9

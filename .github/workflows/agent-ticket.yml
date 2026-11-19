@@ -47,11 +47,11 @@ jobs:
     steps:
       # An `issues` event runs the workflow and the checkout from the default branch, so the
       # guard script below is the one on main, not something the issue can influence.
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: 24
           cache: npm
@@ -103,7 +103,7 @@ jobs:
       - run: npm ci
 
       - name: Run the agent on the ticket
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@f431adaf77e0fecf918431e75a2b5b45b85af002 # v1.0.283
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           label_trigger: ready-for-agent

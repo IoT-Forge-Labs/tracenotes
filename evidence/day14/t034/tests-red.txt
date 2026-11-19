@@ -1,0 +1,7 @@
+  ✖ every uses: in .github/workflows is pinned to a commit with its release (criteria 1, 2) (1.3318ms)
+✖ this repository (1.4359ms)
+ℹ tests 6
+ℹ pass 5
+ℹ fail 1
+✖ failing tests:
+✖ every uses: in .github/workflows is pinned to a commit with its release (criteria 1, 2) (1.3318ms)
