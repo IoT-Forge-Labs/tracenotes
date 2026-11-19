@@ -175,3 +175,10 @@ fix it (SKILL text: a table of allowed characters per value; anything else stops
 escaped or repaired), push, and the human decides the merge as a recorded exception if the review
 stays incomplete. Qodo has not produced a complete review on PR 30: both runs at extended depth
 ended `review_complete: false`.
+
+Review of `cc014f9` (run 2045987, extended, incomplete again): 91a3c1c4 `implemented`, all ten
+earlier findings closed; one new High, 8f818660: breaking-change notes (JSON `breakingNotes`,
+Markdown `  - ` lines) were not compared. Valid, and the last field render writes for an entry.
+Human: fix it, then the human decides the merge. Fixed test-first (`red-pr30-8f818660.txt`): lost,
+changed and invented notes fail. 345 tests. The audit now compares every field render prints for
+an entry (section, scope, subject, commit link, PR link, breaking notes) and the footer.

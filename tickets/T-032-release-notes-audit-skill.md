@@ -49,12 +49,13 @@ describes on the range `d8199fe..3903f33` (6 commits) and reading the code.
      `checked <n>` equal the range's size; `shown + ignored === total`; the footer's shown, merge
      and config counts match; `check`'s verdicts add up; `malformed` is 0 everywhere.
    - `json-links`: every entry's `commitUrl` is `<repoUrl>/commit/<its sha>`, its sha is in the
-     range, and entry k is `group`'s entry k: same commit, section, subject, scope and PR number,
+     range, and entry k is `group`'s entry k: same commit, section, subject, scope, PR number and breaking notes,
      with `prUrl` `<repoUrl>/pull/<n>` or null (amended after review: sets of SHAs let entries
      trade links or text).
    - `markdown-links`: one `- ` line per shown entry; line k sits under `group`'s section
      heading for entry k and, with its escapes removed, is exactly the line render writes for it:
-     scope, subject, commit link and PR link, nothing else.
+     scope, subject, commit link and PR link, nothing else, followed by exactly its breaking notes
+     as `  - ` lines.
    - `check-agrees`: `check`'s `skip` lines name exactly `group`'s merge commits, and its summary
      counts match the `fail`, `malformed` and `skip` lines it printed.
 4. Input that cannot be read (a null section or entry, Markdown without its footer, a rev-list line that is not a 40-character lowercase SHA, JSON that

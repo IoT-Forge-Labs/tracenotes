@@ -114,10 +114,13 @@ export function auditNotes(input: AuditInput): AuditResult {
     if (typeof title !== 'string') throw new RangeError('group.json: a section has no title');
     return field<unknown[]>(s, 'entries', 'group.json', 'array').map(e => {
       if (typeof e !== 'object' || e === null) throw new RangeError('group.json: an entry is not an object');
-      const { subject, scope, prNumber } = e as { subject?: unknown; scope?: unknown; prNumber?: unknown };
+      const { subject, scope, prNumber, breakingNotes } = e as { subject?: unknown; scope?: unknown; prNumber?: unknown; breakingNotes?: unknown };
       if (typeof subject !== 'string' || (scope !== null && typeof scope !== 'string')) throw new RangeError('group.json: an entry has no subject or scope');
       if (prNumber !== null && !Number.isSafeInteger(prNumber)) throw new RangeError('group.json: an entry has an invalid prNumber');
-      return { title, sha: shaOf(e, 'group.json'), subject, scope, prNumber: prNumber as number | null };
+      // PR 30 review, finding 8f818660: a breaking entry's notes are part of what the notes show.
+      const notesList = breakingNotes === undefined ? [] : breakingNotes;
+      if (!Array.isArray(notesList) || !notesList.every(n => typeof n === 'string')) throw new RangeError('group.json: breakingNotes is not a list of strings');
+      return { title, sha: shaOf(e, 'group.json'), subject, scope, prNumber: prNumber as number | null, breakingNotes: notesList as string[] };
     });
   });
   const sectionShas = expected.map(e => e.sha);
@@ -146,6 +149,7 @@ export function auditNotes(input: AuditInput): AuditResult {
         commitUrl: source['commitUrl'],
         prNumber: source['prNumber'],
         prUrl: source['prUrl'],
+        breakingNotes: (e as { breakingNotes?: unknown }).breakingNotes,
       };
     });
   });
@@ -210,12 +214,12 @@ export function auditNotes(input: AuditInput): AuditResult {
   const wrongContent = entries.flatMap((e, k) => {
     const x = expected[k];
     const prUrl = x === undefined || x.prNumber === null ? null : `${input.repoUrl}/pull/${x.prNumber}`;
-    return x !== undefined && e.sha === x.sha && (e.title !== x.title || e.subject !== x.subject || e.scope !== x.scope || e.prNumber !== x.prNumber || e.prUrl !== prUrl) ? [e.sha] : [];
+    return x !== undefined && e.sha === x.sha && (e.title !== x.title || e.subject !== x.subject || e.scope !== x.scope || e.prNumber !== x.prNumber || e.prUrl !== prUrl || JSON.stringify(e.breakingNotes) !== JSON.stringify(x.breakingNotes)) ? [e.sha] : [];
   });
   checks.push({
     id: 'json-links',
     ok: wrongLink.length === 0 && outside.length === 0 && notInGroup.length === 0 && notInNotes.length === 0 && outOfPlace.length === 0 && wrongContent.length === 0 && entries.length === shown,
-    detail: `${entries.length} entries (shown ${shown}); wrong link: ${list(wrongLink)}; not in range: ${list(outside)}; not in group: ${list(notInGroup)}; group entry missing: ${list(notInNotes)}; not in group's order: ${list(outOfPlace)}; wrong section, subject, scope or PR link: ${list(wrongContent)}`,
+    detail: `${entries.length} entries (shown ${shown}); wrong link: ${list(wrongLink)}; not in range: ${list(outside)}; not in group: ${list(notInGroup)}; group entry missing: ${list(notInNotes)}; not in group's order: ${list(outOfPlace)}; wrong section, subject, scope, PR link or breaking notes: ${list(wrongContent)}`,
   });
 
   // markdown-links: one "- " line per shown entry, each with exactly one commit link of its own.
@@ -225,10 +229,13 @@ export function auditNotes(input: AuditInput): AuditResult {
   // gives the text back. Each entry line is read with the heading it sits under.
   const unescape = (text: string) => text.replace(/\\(.)/g, '$1');
   let heading: string | null = null;
-  const placedLines: { line: string; title: string | null }[] = [];
+  // An entry's breaking notes follow it as `  - <note>` lines, a note's further lines indented
+  // by four spaces (render); they are kept with the entry line above them.
+  const placedLines: { line: string; title: string | null; notes: string[] }[] = [];
   for (const line of input.notesMarkdown.split('\n')) {
     if (line.startsWith('### ')) heading = unescape(line.slice(4));
-    else if (line.startsWith('- ')) placedLines.push({ line, title: heading });
+    else if (line.startsWith('- ')) placedLines.push({ line, title: heading, notes: [] });
+    else if (line.startsWith('  ') && placedLines.length > 0) placedLines.at(-1)!.notes.push(line);
   }
   const entryLines = placedLines.map(p => p.line);
   const linked = entryLines.map(line => [...line.matchAll(linkRe)].map(m => m[1]!));
@@ -248,12 +255,13 @@ export function auditNotes(input: AuditInput): AuditResult {
     // PR 30 review, finding 633aace6: the whole line, not its start; render's exact form.
     const pr = x.prNumber === null ? '' : `, [#${x.prNumber}](${input.repoUrl}/pull/${x.prNumber})`;
     const text = `- ${x.scope === null ? '' : `**${x.scope}:** `}${x.subject} ([${short(x.sha)}](${input.repoUrl}/commit/${x.sha})${pr})`;
-    return p.title !== x.title || unescape(p.line) !== text ? [x.sha] : [];
+    const notesText = x.breakingNotes.map(note => `  - ${note.split('\n').join('\n    ')}`).join('\n');
+    return p.title !== x.title || unescape(p.line) !== text || unescape(p.notes.join('\n')) !== notesText ? [x.sha] : [];
   });
   checks.push({
     id: 'markdown-links',
     ok: entryLines.length === shown && badLines === 0 && mdMissing.length === 0 && mdExtra.length === 0 && mdOutOfPlace.length === 0 && mdWrongContent.length === 0,
-    detail: `${entryLines.length} entry lines (shown ${shown}); lines without exactly one commit link: ${badLines}; entry not linked: ${list(mdMissing)}; unexpected link: ${list(mdExtra)}; not in group's order: ${list(mdOutOfPlace)}; not the expected line (heading, scope, subject, links): ${list(mdWrongContent)}`,
+    detail: `${entryLines.length} entry lines (shown ${shown}); lines without exactly one commit link: ${badLines}; entry not linked: ${list(mdMissing)}; unexpected link: ${list(mdExtra)}; not in group's order: ${list(mdOutOfPlace)}; not the expected line (heading, scope, subject, links, breaking notes): ${list(mdWrongContent)}`,
   });
 
   // check-agrees: check skips exactly group's merge commits.

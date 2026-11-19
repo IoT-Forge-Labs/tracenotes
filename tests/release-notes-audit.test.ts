@@ -225,6 +225,25 @@ describe('auditNotes (T-032)', () => {
     assert.deepEqual(failed(json), ['json-links']);
   });
 
+  // PR 30 review, finding 8f818660: the BREAKING CHANGE notes are part of the entry too.
+  test('a lost or changed breaking-change note fails (finding 8f818660)', async () => {
+    const base = await inputsFor(commits);
+    assert.ok(base.notesJson.includes('"the old syntax is gone"'));
+    assert.ok(base.notesMarkdown.includes('\n  - the old syntax is gone\n'));
+    const json = await inputsFor(commits);
+    json.notesJson = json.notesJson.replace('"the old syntax is gone"', '"something else"');
+    assert.deepEqual(failed(json), ['json-links']);
+    const lost = await inputsFor(commits);
+    lost.notesMarkdown = lost.notesMarkdown.replace('\n  - the old syntax is gone\n', '\n');
+    assert.deepEqual(failed(lost), ['markdown-links']);
+    const changed = await inputsFor(commits);
+    changed.notesMarkdown = changed.notesMarkdown.replace('  - the old syntax is gone', '  - the old syntax stays');
+    assert.deepEqual(failed(changed), ['markdown-links']);
+    const added = await inputsFor(commits);
+    added.notesMarkdown = added.notesMarkdown.replace(`/commit/${sha('b')}))\n`, `/commit/${sha('b')}))\n  - an invented note\n`);
+    assert.deepEqual(failed(added), ['markdown-links']);
+  });
+
   // PR 30 review, finding be79ef1c: the Markdown footer's counts must agree too.
   test('a Markdown footer with a wrong count fails counts (finding be79ef1c)', async () => {
     const input = await inputsFor(commits);
