@@ -1,0 +1,9 @@
+  ✖ a flow sequence, an explicit key or a tagged key is reported (PR 34 findings) (0.739ms)
+  ✖ a non-ASCII space next to the SHA or the tag fails (finding 28bcc7c0) (0.2073ms)
+✖ a flow sequence, an explicit key or a tagged key is reported (PR 34 findings) (0.739ms)
+✖ a non-ASCII space next to the SHA or the tag fails (finding 28bcc7c0) (0.2073ms)
+✖ failing tests:
+✖ unpinnedUses (4.4263ms)
+ℹ fail 2
+ℹ pass 9
+ℹ tests 11

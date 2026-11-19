@@ -1,0 +1,11 @@
+  ✖ a SHA with an exact release passes, as a step or a bare key (criterion 1) (1.928ms)
+  ✖ every other spelling of the uses key is reported, not skipped (criterion 2) (0.2534ms)
+  ✖ text that looks like a uses key is reported on purpose (fail closed) (0.1633ms)
+✖ a SHA with an exact release passes, as a step or a bare key (criterion 1) (1.928ms)
+✖ every other spelling of the uses key is reported, not skipped (criterion 2) (0.2534ms)
+✖ failing tests:
+✖ text that looks like a uses key is reported on purpose (fail closed) (0.1633ms)
+✖ unpinnedUses (4.4464ms)
+ℹ fail 3
+ℹ pass 5
+ℹ tests 8

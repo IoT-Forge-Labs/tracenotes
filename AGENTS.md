@@ -235,4 +235,10 @@ human, and one line: `Quality gate: MET` or `Quality gate: NOT MET`, with the re
   commits under the second exception and first commits under the third) name the agent in a
   trailer.
 - One ticket per pull request where possible.
+- Actions in `.github/workflows/` are pinned by full commit SHA, with the release in a comment
+  (`uses: owner/repo@<40 hex> # v1.2.3`). GitHub enforces it: the repository setting
+  `sha_pinning_required` is on, so an unpinned action does not run. `tests/action-pins.test.ts`
+  is the early warning with a readable message; it fails closed on any other spelling of the
+  `uses` key. Bumping a pin is its own pull request that a human reads: the Qodo approval guard
+  on `.github/workflows/**` keeps such a pull request away from the "Qodo approved" label (T-034).
 - Each hackathon day gets a note in `journal/day-NN.md`.
