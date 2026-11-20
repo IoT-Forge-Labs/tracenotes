@@ -54,9 +54,9 @@ flowchart TD
 
   G5A -. "in parallel, after every Qodo PR review" .-> QW{"Qodo workflow (Day 14)<br/>tracenotes gate: no Medium+ findings<br/>complete review of the head,<br/>no finding of Medium or higher, any category"}:::taken
   QW -- "a Medium+ finding" --> NOL["No label<br/>the fix loop of 5a and 5b applies"]:::taken
-  QW -- "none" --> QG{"Approval guard, workspace-wide<br/>does the PR change .github/workflows/**?"}:::taken
+  QW -- "none" --> QG{"Approval guard, workspace-wide<br/>does the PR change .github/workflows/**<br/>or scripts/** (since Nov 20)?"}:::taken
   QG -- "no" --> QL["Qodo adds the label Qodo approved<br/>a label, not an approval vote:<br/>5a and 5b still decide the merge"]:::taken
-  QG -- "yes: guarded" --> HG{{"Human reads the guarded change<br/>workflows hold the agent key,<br/>write tokens and the required checks;<br/>Qodo never labels or approves it"}}:::taken
+  QG -- "yes: guarded" --> HG{{"Human reads the guarded change<br/>workflows hold the agent key,<br/>write tokens and the required checks;<br/>scripts hold the check logic;<br/>Qodo never labels or approves it"}}:::taken
   QL --> HM
   HG --> HM
   HM --> MAIN["main"]:::taken
@@ -77,7 +77,7 @@ flowchart TD
 | 4. Commit and pull request | The human has read the gate report. | The gate report: one row per finding, the checks, the last review, `Quality gate: MET` or `NOT MET`. | — | The human makes the first commit and opens the pull request. On the label lane the bot has committed already and the human only opens it. Since Day 12 the human may instead ask the interactive agent, for one named task, to make the first commit and open the pull request (AGENTS.md, third exception); the agent then waits for the human's go-ahead after the gate report, and the human still merges. |
 | 5a. Pull request head, enforced | `check (ubuntu-latest)`, `check (windows-latest)` and `ticket-link` are green on the head commit. | `gh pr checks`. | A fix on the PR branch moves the head and reruns everything. | GitHub: branch protection on `main` refuses the merge, unless an administrator bypasses protection. The human is an administrator here, so for everyone else nobody has to remember this one, and for the human it is a warning to click through, not a wall. |
 | 5b. Pull request head, by procedure | Qodo's latest completed review is for the head commit (a skipped review counts only after Markdown-and-evidence-only commits) and no High or Medium finding is open. | The review session read with the Review Resolver skill: status, `commit_sha`, each finding's `attribution_status`. | Valid High or Medium: a fix, as in 5a. A dispute, a dismissal or a Low goes to the human, who either asks for a fix or settles it without a code change (a dismissal with a reason, a Low left as it is); the gate is then evaluated again. | The agent reports; the human decides. **Nothing in GitHub enforces 5b.** A pull request with an open High can be merged if the human ignores the gate report. |
-| Qodo workflow and approval guard (Day 14) | Qodo's complete review of the head has no finding of Medium or higher (every category and finding type), and no approval guard matches. The guard covers `.github/workflows/**` in this repository. | The `labeled` event on the pull request (`gh api repos/<repo>/issues/<n>/events`, actor `qodo-code-review[bot]`) and the PR Triage panel ("Reviewed on <sha>", findings open). PR Triage shows no workflow or guard entry of its own. | No label. A Medium+ finding goes through the fix loop of 5a and 5b; a guarded change waits for the human whatever the review says. | Qodo adds the label; the human reads every guarded change and still merges every pull request. The label is the workflow's verdict only: it says nothing about 5a, about a disputed or stale finding, or about the acceptance criteria. |
+| Qodo workflow and approval guard (Day 14) | Qodo's complete review of the head has no finding of Medium or higher (every category and finding type), and no approval guard matches. The guard covers `.github/workflows/**` and, since Nov 20, `scripts/**` in this repository. | The `labeled` event on the pull request (`gh api repos/<repo>/issues/<n>/events`, actor `qodo-code-review[bot]`) and the PR Triage panel ("Reviewed on <sha>", findings open). PR Triage shows no workflow or guard entry of its own. | No label. A Medium+ finding goes through the fix loop of 5a and 5b; a guarded change waits for the human whatever the review says. | Qodo adds the label; the human reads every guarded change and still merges every pull request. The label is the workflow's verdict only: it says nothing about 5a, about a disputed or stale finding, or about the acceptance criteria. |
 | Merge | 5a green and the gate report says MET. | The gate report. | — | The human. |
 
 Who makes the fix commit on a pull request depends on the lane. In a session the agent commits
@@ -149,7 +149,13 @@ the guard; only the clean re-review did. Evidence: `evidence/day14/`.
   workflow and the scripts come from the pull request. They catch slips, not intent; the human
   reviews changes to them. Since Day 14 the approval guard on `.github/workflows/**` makes that
   review mandatory in Qodo's terms (no label for such a change), and every action is pinned by
-  commit with GitHub's `sha_pinning_required` on (T-034). `scripts/` is not guarded yet.
+  commit with GitHub's `sha_pinning_required` on (T-034). Since Nov 20 the guard also covers
+  `scripts/**`, where the check logic lives (`pr-ticket-check.ts`, `ticket-ready.ts`,
+  `source-hygiene.ts`, `action-pins.ts`); read back after a reload
+  (`evidence/day15/01-guard-scripts-after-reload.png`). `tests/` stays unguarded on purpose:
+  guarding it would send almost every pull request to a person. A pull request can still weaken
+  a script's test without touching the script and get the label; the human's review of the diff
+  is the only defence there.
 - **The "Qodo approved" label is not the gate.** It reads one condition (no Medium+ finding at
   the head). Branch protection does not require it, and it does not see the checks, a disputed
   finding, a local-review finding, or the acceptance criteria. The gate report stays the

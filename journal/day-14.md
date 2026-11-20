@@ -181,3 +181,14 @@ A configuration you cannot see in the repository has to be read back after every
 guard lost its path and the workflow landed in the wrong scope, and both screens looked right
 at the moment of saving. And a missing label proves a guard only when the review was clean:
 the first "no label" on #34 was the findings talking, not the guard.
+
+## Follow-up (Nov 20): `scripts/` guarded too
+
+The post left one question open: guard `scripts/` as well? Yes. The scripts are the logic
+behind the checks (`pr-ticket-check.ts` for `ticket-link`, `ticket-ready.ts` for the label-lane
+guard, `source-hygiene.ts`, `action-pins.ts`), and a pull request that weakens one should go to
+a person the same way a workflow change does. The human added `scripts/**` to the
+`ubayouski/tracenotes` guard, saved, reloaded and reopened it: both paths held, Save guards
+greyed out (`evidence/day15/01-guard-scripts-after-reload.png`, sidebar cropped out). The
+portal now reads "Trial ended", but the guard still saved. `tests/` stays unguarded on purpose
+(see `FACTORY.md`, known gaps). `FACTORY.md` and `AGENTS.md` updated.

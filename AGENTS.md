@@ -241,4 +241,8 @@ human, and one line: `Quality gate: MET` or `Quality gate: NOT MET`, with the re
   is the early warning with a readable message; it fails closed on any other spelling of the
   `uses` key. Bumping a pin is its own pull request that a human reads: the Qodo approval guard
   on `.github/workflows/**` keeps such a pull request away from the "Qodo approved" label (T-034).
+- Changes to `scripts/` go to a person too. The scripts are the logic behind the checks
+  (`ticket-link`, the label-lane guard, source hygiene, action pins), so the Qodo approval guard
+  covers `scripts/**` as well (Nov 20): such a pull request never gets the "Qodo approved" label,
+  and the human reads the diff.
 - Each hackathon day gets a note in `journal/day-NN.md`.
