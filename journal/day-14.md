@@ -10,7 +10,7 @@ canonical. T-013, the MCP server, moves to a free slot.)
 PRs: https://github.com/UBayouski/tracenotes/pull/33 (outside) and
 https://github.com/UBayouski/tracenotes/pull/34 (inside). Issues #31, #32.
 
-- Post: _TODO_
+- Post: https://github.com/orgs/qodo-hackathon/discussions/16#discussioncomment-19757736
 
 Status: both predictions held. #34 merged by the human as `49e7cee`, then #33 as `0ed246a`
 (merge order below); issues #31 and #32 closed. The Qodo trial showed "0 days left" all day.
