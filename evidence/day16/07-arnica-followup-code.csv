@@ -1,0 +1,3 @@
+Severity,Status,Asset,File,Type,Description,First Detected,Last Updated,SLA Start,
+Low,Open,github://IoT-Forge-Labs/tracenotes#main,https://github.com/IoT-Forge-Labs/tracenotes/blob/501f9838e2321b5e616b8a2d4d34d2bcf85897c0/src/config.ts#L30,SAST," Security Misconfiguration: Detect non literal regexp",2026-11-23T18:25:38.658Z,2026-11-23T18:25:38.658Z,,
+Low,Open,github://IoT-Forge-Labs/tracenotes#main,https://github.com/IoT-Forge-Labs/tracenotes/blob/9ba1863d161bb912803101321623e8dddf069791/.claude/skills/release-notes-audit/scripts/audit.ts#L191,SAST," Security Misconfiguration: Detect non literal regexp",2026-11-23T18:25:38.562Z,2026-11-23T18:25:38.562Z,,
