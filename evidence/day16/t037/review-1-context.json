@@ -1,0 +1,10 @@
+{
+  "recent_work": [
+    "T-037: audit.ts no longer builds a RegExp from the repository URL; a fixed pattern captures every full-SHA commit link and the base is compared to input.repoUrl with ===. One guard test added (a base that differs only at a dot of the URL). Behaviour is meant to be unchanged: old and new script give byte-identical reports on three saved input sets (evidence/day16/t037/)."
+  ],
+  "decisions": [
+    "The BACKLOG row for T-037 says planned on purpose: the pull request number does not exist yet; the row is set to done (PR n) in the second commit on the pull request, as on PRs 24, 33, 34 and 36. The human accepted this handling on PR 36 (finding d6f052b6).",
+    "src/config.ts line 30 (user-written ignore patterns) is not changed; the human dismisses that Arnica finding as intentional."
+  ],
+  "notes": "evidence/day16/t037/audit-inputs holds a git log stream of five public commits used for the before/after comparison."
+}

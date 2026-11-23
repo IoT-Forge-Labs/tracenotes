@@ -189,6 +189,16 @@ describe('auditNotes (T-032)', () => {
     assert.deepEqual(failed(input), ['markdown-links']);
   });
 
+  // T-037: the link's base is compared as text. A base that differs only where the repository
+  // URL has a dot (a character that is special in a regular expression) is another repository.
+  test('a link whose base differs only at a dot of the repository URL is not the entry\'s own (T-037, criterion 2)', async () => {
+    const input = await inputsFor(commits);
+    const own = `(${repoUrl}/commit/${sha('b')})`;
+    assert.ok(input.notesMarkdown.includes(own), input.notesMarkdown);
+    input.notesMarkdown = input.notesMarkdown.replace(own, `(https://githubXcom/o/r/commit/${sha('b')})`);
+    assert.deepEqual(failed(input), ['markdown-links']);
+  });
+
   // Qodo local review finding d457935f: skip lines carry short SHAs, which two merges can share.
   test('two merges with the same short SHA still pass check-agrees (finding d457935f)', async () => {
     const twin = `${'c'.repeat(7)}${'d'.repeat(33)}`;

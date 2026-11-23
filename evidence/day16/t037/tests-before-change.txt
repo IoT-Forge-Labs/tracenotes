@@ -1,0 +1,43 @@
+▶ auditNotes (T-032)
+  ✔ a clean range passes every check (criteria 2, 3) (5.608ms)
+  ✔ a commit in the range but not in the notes fails exactly-once and counts, naming it (0.9152ms)
+  ✔ a commit in the notes but not in the range fails exactly-once and json-links (0.697ms)
+  ✔ a commit listed twice in the range fails exactly-once (0.4411ms)
+  ✔ a Markdown entry without its commit link fails markdown-links (0.3617ms)
+  ✔ a JSON entry with a wrong link fails json-links (0.3762ms)
+  ✔ a malformed record fails exactly-once and counts (0.7401ms)
+  ✔ two JSON entries with swapped sources fail json-links (finding 44bb76a4) (0.3326ms)
+  ✔ two Markdown lines with swapped links fail markdown-links (finding 7f66a5e3) (0.3536ms)
+  ✔ a JSON entry with another entry's subject fails json-links (finding 7dc5829e) (0.5838ms)
+  ✔ a Markdown line with another entry's subject fails markdown-links (finding 7dc5829e) (0.2682ms)
+  ✔ a JSON entry moved to another section, same order, fails json-links (finding f9b538b4) (0.3019ms)
+  ✔ a Markdown entry under the wrong heading fails markdown-links (finding f9b538b4) (0.359ms)
+  ✔ commit-link text inside a subject does not fail a clean audit (finding 5638c83e) (0.305ms)
+  ✔ check totals that do not add up fail counts (finding 4f944bf8) (0.2863ms)
+  ✔ a skip count offset by extra passes fails check-agrees (finding 624dd0de) (0.7906ms)
+  ✔ an entry line with a second commit link to another repository fails markdown-links (finding 4b2ac78e) (0.3183ms)
+  ✔ a link whose base differs only at a dot of the repository URL is not the entry's own (T-037, criterion 2) (0.2467ms)
+  ✔ two merges with the same short SHA still pass check-agrees (finding d457935f) (0.3219ms)
+  ✔ a check total that disagrees fails counts; a missing skip line fails check-agrees (0.4077ms)
+  ✔ extra text on a Markdown line, or a wrong PR link, fails (finding 633aace6) (0.7468ms)
+  ✔ a lost or changed breaking-change note fails (finding 8f818660) (1.1113ms)
+  ✔ a non-merge commit in ignored fails exactly-once, even with consistent outputs (finding 234d5143) (2.5703ms)
+  ✔ a Markdown footer with a wrong count fails counts (finding be79ef1c) (0.2398ms)
+  ✔ a rejected repository URL is not quoted in the error (finding e1492647) (0.4319ms)
+  ✔ unreadable input throws RangeError, nothing is guessed (criterion 4) (0.3858ms)
+✔ auditNotes (T-032) (20.8252ms)
+▶ release-notes-audit entry as a child process (criterion 5)
+  ✔ PASS: exit 0, one line per check and the verdict (76.4125ms)
+  ✔ FAIL: exit 1 and the count of failed checks (75.4263ms)
+  ✔ bad input or usage: exit 2, one error line, nothing on stdout (226.1563ms)
+  ✔ an error message with a bidi override or a line separator stays one escaped line (finding 2a84cc4a) (81.6392ms)
+  ✔ a rejected repository URL is not printed by the entry either (finding e1492647) (75.5365ms)
+✔ release-notes-audit entry as a child process (criterion 5) (537.5156ms)
+ℹ tests 31
+ℹ suites 2
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 664.3714

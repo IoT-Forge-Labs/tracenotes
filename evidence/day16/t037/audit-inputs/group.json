@@ -1,0 +1,74 @@
+{
+  "sections": [
+    {
+      "title": "Bug fixes",
+      "entries": [
+        {
+          "sha": "fae957aa4b6d0daf6c4d38aca1f3f440ef722589",
+          "shortSha": "fae957a",
+          "subject": "do not keep the job token after checkout (T-035)",
+          "scope": "ci",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "fix"
+        }
+      ]
+    },
+    {
+      "title": "docs",
+      "entries": [
+        {
+          "sha": "99aa0a43bac1c02f2f103596e8566b7a4d56221d",
+          "shortSha": "99aa0a4",
+          "subject": "journal and evidence for PR 36",
+          "scope": "day-16",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        },
+        {
+          "sha": "44fe418085a075be0b66b8bbf63686530297a19a",
+          "shortSha": "44fe418",
+          "subject": "T-035 done (PR 36)",
+          "scope": "backlog",
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": "docs"
+        }
+      ]
+    },
+    {
+      "title": "Unclassified",
+      "entries": [
+        {
+          "sha": "8f88b60d25e4e2aab258bc9212f6f4f18426b59e",
+          "shortSha": "8f88b60",
+          "subject": "Arnica report",
+          "scope": null,
+          "prNumber": null,
+          "issueRefs": [],
+          "breaking": false,
+          "type": null
+        }
+      ]
+    }
+  ],
+  "ignored": [
+    {
+      "sha": "1a6f86529dcf93ea5dd643c3e611e1f369badbd2",
+      "shortSha": "1a6f865",
+      "subject": "Merge pull request #36 from UBayouski/t-035-checkout-credentials",
+      "scope": null,
+      "prNumber": null,
+      "issueRefs": [],
+      "breaking": false,
+      "type": null,
+      "reason": "merge commit"
+    }
+  ],
+  "malformed": [],
+  "total": 5
+}

@@ -1,0 +1,5 @@
+Including 11 untracked file(s): evidence/day16/t037/audit-after.txt, evidence/day16/t037/audit-before.txt, evidence/day16/t037/audit-saved-ranges.txt, evidence/day16/t037/local-review-1.json, +7 more
+262 gitignored file(s) not reviewed.
+Reviewing UBayouski/tracenotes @ 8f88b60d2 — 22109B of local changes (filtered to 2 paths) · deep depth (base cloned by the reviewer)
+Local comparison: no saved checkpoint is available. The server will recover history or report a full fallback.
+  trace 8415c28715c6b19a4cf8c9ba0df0c6a9

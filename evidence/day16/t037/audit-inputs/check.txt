@@ -1,0 +1,4 @@
+fail 8f88b60 "Arnica report"
+fail fae957a "  fix(ci): do not keep the job token after checkout (T-035)"
+skip 1a6f865 merge commit
+checked 5: 2 passed, 2 failed, 1 skipped, 0 malformed

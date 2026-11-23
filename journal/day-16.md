@@ -7,7 +7,7 @@ or dismiss with a reason), and add the scan to the Day 10 diagram. A completed s
 findings is a valid result. A fix is optional. (The plan said "Wire up the factory" for today;
 the thread is canonical. T-015 and T-029 move to a free slot.)
 
-Status: in progress. Scan, investigation, fix and pull request 36 done (gate MET, not merged); follow-up scan and post open.
+Status: T-035 merged (`1a6f865`), follow-up scan read (four Mediums resolved automatically). T-037 built, gate pending a human decision. Open: post, Arnica dismissals, the agent-workflow runs.
 
 ## Setup constraint
 
@@ -118,7 +118,8 @@ The other three, read but not the finding of the day:
   is the feature (T-008). A slow pattern can only stall the run of the person who wrote it.
 - 6: the audit script builds one expression from the repository URL after escaping every
   special character in it.
-- 7: `https://user:ghp_SECRET456@github.com/o/r?token=1` is a made-up value in a test that
+- 7: the value on that line (a URL with a made-up user, password and `token` parameter) is a
+  fixture in a test that
   proves a rejected remote never appears in an error message. Arnica marked it Invalid itself.
   Other made-up credential URLs in `tests/cli.test.ts` were not flagged.
 
@@ -205,6 +206,90 @@ for the head with no finding open, merge state clean. The human merges. Evidence
 Still open after the merge: sync the fork and read Arnica again (criterion 7); run both agent
 paths once before the label lane is relied on (criterion 6).
 
+## After the merge: Arnica again
+
+The human fixed the pull request's title (two leading spaces) and body (a bare mention of the
+`claude` account, from the agent's draft), then merged pull request 36 as `1a6f865` at 19:15:09
+UTC; issue #35 closed; `Check` green on `main`. The fork was synced: `IoT-Forge-Labs/tracenotes`
+and `main` are both at `1a6f865`, tree `66ec99c`. Arnica rescanned on the push, with nothing
+started by hand. Exports read at 19:37 UTC: `evidence/day16/07-arnica-followup-code.csv` and
+`07-arnica-followup-secrets.csv`.
+
+| Finding | Before (`b349b8b`) | After (`1a6f865`) |
+|---|---|---|
+| 4 Medium, checkout keeps the token | Open | **Resolved Automatically**, all four |
+| Low, `src/config.ts#L30` | Open | Open |
+| Low, audit script | Open | Open |
+| Info, credential URL in `tests/remote.test.ts#L106` | Open | Open, "Present in HEAD: false" |
+| Info, credential URL in `journal/day-16.md#L121` | did not exist | **new**, Open, Invalid, first detected 19:16:16 UTC |
+
+- Criterion 7 of T-035: met. With the status filter widened, Arnica lists six code findings:
+  the four Mediums as "Resolved Automatically", last updated a minute after the merge, and the
+  two Lows open (`evidence/day16/08-arnica-followup-code.png`,
+  `09-arnica-resolved-automatically.png`, read at 19:41 UTC). The audit-script finding now
+  points at line 236, its place on the merged `main`.
+- The new finding is the agent's own doing: this journal quoted the made-up credential URL from
+  the test in full, in the paragraph that explains why the first secret finding is harmless,
+  and the scanner found the quote one minute after the merge. The line now describes the value
+  without repeating it; the next sync should clear it.
+- The export says the test fixture is no longer present in HEAD. The file and the line are
+  unchanged on `main`; not explained.
+
+## The two Lows: one dismissed, one fixed (T-037)
+
+After the follow-up scan the human asked whether both Low findings could be fixed.
+
+- `src/config.ts#L30`: not without changing the product. The line compiles the ignore patterns
+  a user writes in `.tracenotes.json` (T-008). Any expression built from input is flagged, so
+  the finding closes only if patterns stop being regular expressions. Decision (human): dismiss
+  in Arnica as intentional.
+- The audit script: fixable. Decision (human): fix it, ticket T-037, issue #37 (no label).
+
+T-037, local branch `t-037-audit-fixed-link-pattern`, built in the session:
+
+- `audit.ts` built one expression from the repository URL, with its special characters escaped,
+  to find an entry line's own commit links. It now uses a fixed pattern for any commit link with
+  a full SHA and compares the link's base to the repository URL with `===`. No `RegExp(` call
+  is left in the file.
+- A guard test for what the escaping was for: a base that differs only where the URL has a dot
+  is another repository. It passed before the change and passes after it
+  (`evidence/day16/t037/tests-before-change.txt`).
+- Same report before and after, byte for byte, on three saved input sets: the Day 16 range
+  `b349b8b..8f88b60` (5 commits, `audit-before.txt`, `audit-after.txt`) and the two Day 13
+  histories of 76 commits (`audit-saved-ranges.txt`, old script against new on the same inputs).
+- `npm run check`: 385 pass, 0 fail.
+
+Qodo local reviews (deep, issue #37 as the ticket), under `evidence/day16/t037/`:
+
+| Review | Result |
+|---|---|
+| 1 (run `d8069e44`) | Nothing on the code. Coverage incomplete: `audit-inputs/stream.bin` skipped as binary. One finding, e8894004, High, Reliability: "Saved audit lacks its input stream". |
+| 2 (run `790d2336`) | That directory excluded by path; coverage complete. Nothing on the code. One Low, daf8384b: the review-2 output files looked empty. |
+
+Both findings describe the review's own view, not the tree:
+
+- e8894004: `stream.bin` is in `evidence/day16/t037/audit-inputs/`, next to the files derived
+  from it. The reviewer could not see a file it had skipped. Disputed by the agent as a false
+  positive; a disputed High blocks until the human decides.
+- daf8384b: the two files are the output of the review that was running; they are written when
+  it ends and are not empty now.
+
+The reviewer's note on review 2 is right and kept: for a hand-edited line with an unescaped `](`
+before a valid link, the verdict is the same (the audit fails) but the detail text can differ
+from the old script's. Lines the renderer writes are not affected.
+
+Gate report, uncommitted tree, after review 2:
+
+| Finding | Category | `action_level` / severity | Status | Decision |
+|---|---|---|---|---|
+| e8894004 | Reliability | `action_required` / High | open (review 1), not re-evaluated in review 2 | disputed: the file exists; the human decides |
+| daf8384b | Observability | `informational` / Low | open | reported: the files are filled when the review ends |
+
+`npm run check`: 385 pass. Fix rounds: 0 (one comment added after review 1, no code path
+changed). Deep reviews completed: 2, the last one on the final tree without the binary inputs.
+
+**Quality gate: NOT MET** until the human decides e8894004.
+
 ## Predictions against the result
 
 | Job | Predicted | Observed |
@@ -228,8 +313,33 @@ pull request, the follow-up Arnica read and the post are not.
 
 ## What I missed
 
-_TODO_
+- The agent quoted a credential-shaped fixture into the journal, and the scan after the merge
+  reported it as a new secret. Rule 4 (no secrets) was not broken, the value is made up, but a
+  scanner cannot know that, and evidence written about a finding became a finding.
+- The agent's draft of the pull request body held a bare mention that GitHub turned into a
+  notification for a real account. No workflow ran (the agent workflow listens to comments, not
+  bodies). In text that goes to GitHub, a handle goes in backticks.
+- The first prediction for the secrets scan named the wrong test file.
+- Qodo's local review found five holes in the check written around a five-line fix, one of them
+  High. The fix was right from the start; the guard for it was not.
+- The Arnica app was installed with access to all repositories of the organization, not a
+  selected one. Read back with `gh api`; harmless today, since the fork is alone there.
+- The secrets screenshot showed the account email in the details panel. Cropped before it went
+  into `evidence/`.
+- The agent reported the journal as committed on `main` (`8f88b60`) after checking only that the
+  working tree was clean. The commit held the evidence files; the journal edits (the follow-up
+  section, this section, the reworded credential line) were in a stash made when the branch was
+  switched. So the fork was synced with the quoted value still in the journal, and that Arnica
+  finding could not clear. Found later in the same session while adding the T-037 section; the journal now
+  travels with the T-037 pull request. "Clean tree" is not "committed": read the commit.
+
+Not verified: the two agent workflows with the option set (no labelled run, no `@claude` run);
+the job list of the rescan (the page was not found again; the detection times stand in for it);
+the Mermaid diagram as GitHub renders it.
 
 ## Lesson
 
-_TODO_
+A scanner's finding is a place to look, not a verdict. Arnica said Medium four times for one
+line; the run logs said two of the four were worth nothing and one path in the other two was
+real, and next to it sat an exposure no scanner had reported. And what is written about a
+finding gets scanned too: describe a credential-shaped value, never quote it.
