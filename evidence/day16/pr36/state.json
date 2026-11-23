@@ -1,0 +1,1 @@
+{"checks":[{"conclusion":"SUCCESS","name":"check (ubuntu-latest)"},{"conclusion":"SUCCESS","name":"ticket-link"},{"conclusion":"SUCCESS","name":"check (windows-latest)"}],"head":"44fe418085a075be0b66b8bbf63686530297a19a","labels":[],"mergeStateStatus":"CLEAN","mergeable":"MERGEABLE"}

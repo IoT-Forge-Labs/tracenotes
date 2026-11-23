@@ -7,7 +7,7 @@ or dismiss with a reason), and add the scan to the Day 10 diagram. A completed s
 findings is a valid result. A fix is optional. (The plan said "Wire up the factory" for today;
 the thread is canonical. T-015 and T-029 move to a free slot.)
 
-Status: in progress. Scan, investigation and fix done; pull request, follow-up scan and post open.
+Status: in progress. Scan, investigation, fix and pull request 36 done (gate MET, not merged); follow-up scan and post open.
 
 ## Setup constraint
 
@@ -125,7 +125,7 @@ The other three, read but not the finding of the day:
 ## The fix: T-035
 
 Ticket `tickets/T-035-checkout-credentials.md`, issue #35 (no label), local branch
-`t-035-checkout-credentials`, built in the session.
+`t-035-checkout-credentials`, built in the session, pull request 36.
 
 - Test first: `scripts/checkout-credentials.ts` and `tests/checkout-credentials.test.ts`. The
   repository test was red on exactly Arnica's four lines (`evidence/day16/t035/tests-red.txt`):
@@ -166,7 +166,7 @@ on the final tree. This section's row 5 and this report were written after revie
 Markdown only.
 
 **Quality gate: NOT MET.** One Medium is open and disputed; a disputed finding blocks until the
-human decides.
+human decides. (Decided the same hour: by design, see "Pull request 36".)
 
 Unresolved verification, stated before the pull request exists:
 
@@ -177,6 +177,33 @@ Unresolved verification, stated before the pull request exists:
 - The check reads `.github/workflows/` only. A checkout step in a composite action under
   `.github/actions/` would not be seen; there is none today.
 - Arnica: after the merge the fork is synced and the findings are read again.
+
+## Pull request 36
+
+The human accepted d6f052b6 as by design, made the first commit (`fae957a`) and opened
+https://github.com/UBayouski/tracenotes/pull/36 (`Closes #35`).
+
+| Head | Checks | Qodo review |
+|---|---|---|
+| `fae957a` (human) | `ticket-link` failed, as designed: the row said `planned`. `check` was cancelled by the next push. | run 2119543, superseded |
+| `44fe418` (agent: `BACKLOG.md` row `done (PR 36)`) | `check (ubuntu-latest)`, `check (windows-latest)`, `ticket-link`: all pass. 384 tests on Windows; 383 and one skip on Linux (a Windows-only test). | run 2119561: completed for `44fe418`, `review_complete: true`, **0 findings** |
+
+- The option took effect in the pull request's own run (45245253974): the log shows
+  `persist-credentials: false`, and the credential is removed inside the checkout step
+  (`git config --local --unset-all http.https://github.com/.extraheader`) before `setup-node`
+  starts. Before the fix it stayed until the post-job cleanup. That verifies `check.yml`;
+  `ticket-link.yml` ran green with the same option.
+- Prediction in the pull request body: no "Qodo approved" label, because the change is inside
+  the approval guard. Observed: clean complete review at the head, no label, no `labeled` event
+  (`evidence/day16/pr36/issue-events.json`). The guard held, as on pull request 34.
+- d6f052b6 did not come back in the PR review: the row was `done (PR 36)` at the reviewed head.
+
+**Gate on pull request 36: MET at `44fe418`.** Checks green on the head, Qodo's review completed
+for the head with no finding open, merge state clean. The human merges. Evidence:
+`evidence/day16/pr36/`.
+
+Still open after the merge: sync the fork and read Arnica again (criterion 7); run both agent
+paths once before the label lane is relied on (criterion 6).
 
 ## Predictions against the result
 
