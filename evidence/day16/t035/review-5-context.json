@@ -1,0 +1,10 @@
+{
+  "recent_work": [
+    "Fix round 3 (the last allowed) after local review 4. 140b01cb: three child-process tests for scripts/checkout-credentials.ts (no argument: exit 0; a directory with problems: exit 1, one line per problem, files in name order; a clean directory: exit 0). 14bdfd21: the T-035 section of journal/day-16.md rewritten to the current state, with one row per review; its row for this review and the gate report are filled in after this run. AGENTS.md now states that the check reads .github/workflows/ only."
+  ],
+  "decisions": [
+    "d6f052b6 (BACKLOG row says planned): disputed by the agent, waiting for the human. The pull request number does not exist until the pull request is opened; the row is set to done (PR n) in the second commit on the pull request, as on PRs 24, 33 and 34. ticket-link is red on the first commit by design (Day 10).",
+    "The agent workflows are not run by this ticket (criterion 6); that verification is recorded as open."
+  ],
+  "notes": "PNG screenshots under evidence/day16 are excluded from this review so that coverage can be complete."
+}

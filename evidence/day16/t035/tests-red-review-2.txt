@@ -1,0 +1,106 @@
+▶ persistedCredentials
+  ✔ a step that sets the option passes, as a list item or after another key (criterion 2) (1.0685ms)
+  ✔ CRLF line endings are framing, not content (criterion 2) (0.6737ms)
+  ✔ a step with no `with:` block is reported with its file and line (criterion 2) (0.2559ms)
+  ✔ a `with:` block without the option is reported (criterion 2) (0.0833ms)
+  ✔ the option of the next step does not count for this one (criterion 2) (0.0795ms)
+  ✔ any value other than a bare false is reported (criterion 2) (0.1309ms)
+  ✔ the option given twice, or nested under another key, is reported (criterion 2) (0.0951ms)
+  ✔ `with:` at another column, a flow mapping or a key in between is reported (criterion 2) (0.077ms)
+  ✔ every other mention of the action is reported as unsupported (criterion 2) (0.1032ms)
+  ✖ text inside a multi-line value does not count as the option (criterion 2) (0.7972ms)
+  ✖ a comment, a quote or a blank line inside `with:` is reported (criterion 2) (0.1842ms)
+  ✔ blank lines after the block, before the next step, are fine (criterion 2) (0.0908ms)
+  ✖ a quoted or escaped `uses` value is reported whatever it spells (criterion 2) (0.2002ms)
+  ✔ a file without a checkout step has no problems (criterion 2) (0.0447ms)
+✖ persistedCredentials (4.8055ms)
+▶ the workflows of this repository
+  ✔ every checkout step sets persist-credentials: false (criterion 1) (1.4348ms)
+✔ the workflows of this repository (1.5006ms)
+ℹ tests 15
+ℹ suites 2
+ℹ pass 12
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 99.6704
+
+✖ failing tests:
+
+test at tests\checkout-credentials.test.ts:102:3
+✖ text inside a multi-line value does not count as the option (criterion 2) (0.7972ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   1
+  - ]
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Qodo/dark_factory/tests/checkout-credentials.test.ts:103:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 1 ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests\checkout-credentials.test.ts:119:3
+✖ a comment, a quote or a blank line inside `with:` is reported (criterion 2) (0.1842ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   1
+  - ]
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Qodo/dark_factory/tests/checkout-credentials.test.ts:120:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 1 ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests\checkout-credentials.test.ts:137:3
+✖ a quoted or escaped `uses` value is reported whatever it spells (criterion 2) (0.2002ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + []
+  - [
+  -   1,
+  -   2,
+  -   3
+  - ]
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Qodo/dark_factory/tests/checkout-credentials.test.ts:146:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Suite.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [],
+    expected: [ 1, 2, 3 ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

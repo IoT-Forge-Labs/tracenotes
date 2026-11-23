@@ -1,0 +1,13 @@
+$ date -u +%FT%TZ
+2026-11-23T18:23:04Z
+$ gh api orgs/IoT-Forge-Labs/installations --jq '.installations[] | [.id, .app_slug, .repository_selection, .created_at] | @tsv'
+185105277	arnica-github-connector	all	2026-11-23T10:22:38.000-08:00
+$ gh api orgs/IoT-Forge-Labs/installations --jq '.installations[] | select(.app_slug|test("arnica")) | .permissions'
+{"actions":"read","administration":"write","checks":"write","contents":"write","deployments":"read","discussions":"read","environments":"read","issues":"read","members":"write","metadata":"read","organization_administration":"read","organization_hooks":"read","organization_plan":"read","organization_projects":"read","organization_self_hosted_runners":"read","organization_user_blocking":"read","packages":"read","pages":"read","pull_requests":"write","repository_hooks":"read","repository_projects":"read","secret_scanning_alerts":"read","security_events":"read","single_file":"write","statuses":"read","vulnerability_alerts":"read","workflows":"write"}
+$ gh api orgs/IoT-Forge-Labs/installations --jq '.installations[] | select(.app_slug|test("arnica")) | .events | join(" ")'
+branch_protection_rule check_run check_suite code_scanning_alert commit_comment create delete deployment deployment_review deployment_status deploy_key discussion discussion_comment fork gollum issues issue_comment label member membership merge_queue_entry milestone organization org_block page_build project project_card project_column public pull_request pull_request_review pull_request_review_comment pull_request_review_thread push registry_package release repository repository_dispatch secret_scanning_alert star status team team_add watch workflow_dispatch workflow_job workflow_run
+$ gh api orgs/IoT-Forge-Labs/repos --jq '[.[].full_name] | join(" ")'
+IoT-Forge-Labs/tracenotes
+$ gh api repos/IoT-Forge-Labs/tracenotes/hooks --jq '.[] | [.name, .active, (.events|join(",")), .config.url] | @tsv'
+$ gh api repos/IoT-Forge-Labs/tracenotes/commits/main --jq '.sha[0:7]'
+b349b8b

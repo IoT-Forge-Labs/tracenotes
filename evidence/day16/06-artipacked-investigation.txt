@@ -1,0 +1,43 @@
+Investigation of Arnica's four Medium SAST findings, rule 'GitHub actions artipacked vulnerability'
+(actions/checkout without persist-credentials: false). Read with gh run view --log, Nov 23.
+
+## 1. Does any workflow upload an artifact, a Pages bundle or a cache of the work tree?
+$ grep -rn 'upload-artifact\|upload-pages\|cache@' .github/workflows
+(no match)
+
+## 2. check.yml, run 45228686728 on main at b349b8b (both systems)
+      2   persist-credentials: true
+      1 [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+      1 [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+      2 Contents: read
+      2 Metadata: read
+
+## 3. agent-ticket.yml, run 42870198062 (issue 15, Nov 10; action then at the v1 tag)
+      1   persist-credentials: true
+      1 [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+      1 Actions: read
+      1 Contents: write
+      1 Issues: write
+      1 Metadata: read
+      1 PullRequests: write
+
+The action then replaces the checkout credential with its own (log lines in order):
+Requesting OIDC token...
+Attempt 1 of 3...
+OIDC token successfully obtained
+Exchanging OIDC token for app token...
+Attempt 1 of 3...
+App token successfully obtained
+Using GITHUB_TOKEN from OIDC
+Configuring git authentication for non-signing mode
+Configuring git user...
+Setting git user as claude[bot]...
+✓ Set git user as claude[bot]
+Removing existing git authentication headers...
+✓ Removed existing authentication headers
+Updating remote URL with authentication...
+✓ Updated remote URL with authentication token
+Git authentication configured successfully
+
+and revokes its token at the end:
+##[start-action display=Revoke app token;id=__anthropics_claude-code-action.__run_9]

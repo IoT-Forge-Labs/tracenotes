@@ -1,0 +1,4 @@
+Including 22 untracked file(s): evidence/day16/01-fork-same-commit.txt, evidence/day16/02-arnica-installation.txt, evidence/day16/03-arnica-jobs.txt, evidence/day16/04-arnica-code-findings.csv, +18 more
+262 gitignored file(s) not reviewed.
+Reviewing UBayouski/tracenotes @ b349b8b51 — 95376B of local changes (filtered to 2 paths) · deep depth (base cloned by the reviewer)
+  trace 5df623181b0f67eef451df6503367fd8

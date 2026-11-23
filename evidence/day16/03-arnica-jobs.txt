@@ -1,0 +1,16 @@
+app.arnica.io > Admin > Jobs > Task List, read from the screenshot 03-arnica-jobs.png
+Times are local, UTC-8 (10:25 AM = 18:25 UTC). 13 tasks; 9 visible on the first screen.
+Pending 0  Enqueued 0  Awaiting 0  Running 0  Completed 9  Failed 0  Cancelled 0  Skipped 4
+
+Update Product Owners              IoT-Forge-Labs             Completed  Done updating automatic products  11/23/2026, 10:27:48 AM
+Identity Assignment                                           Completed  Done (1 organizations)            11/23/2026, 10:27:18 AM
+Inventory: Scan Repository         IoT Forge Labs/tracenotes  Completed  Done                              11/23/2026, 10:26:49 AM
+InventoryScanRepositoryMembershipTask                         Skipped    Membership not supported          11/23/2026, 10:26:49 AM
+SAST Scan                          tracenotes#main            Completed  Done (6 findings)                 11/23/2026, 10:25:39 AM
+Secrets Scan                       tracenotes#main            Completed  Done (1 findings)                 11/23/2026, 10:25:26 AM
+IAC Scan                           tracenotes#main            Completed  Done (0 findings)                 11/23/2026, 10:25:26 AM
+SCA/License Scan                   tracenotes#main            Completed  Done (0 findings)                 11/23/2026, 10:24:53 AM
+Clean Up Removed Repositories      IoT-Forge-Labs             Skipped    no recently deleted/unreachable repositories detected  11/23/2026, 10:24:21 AM
+
+The job cards name the branch (tracenotes#main), not a commit. The fork's main was at b349b8b
+before the installation (01, 17:59 UTC) and after it (02, 18:23 UTC).

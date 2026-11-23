@@ -1,0 +1,8 @@
+Including 14 untracked file(s): evidence/day16/01-fork-same-commit.txt, evidence/day16/02-arnica-installation.txt, evidence/day16/03-arnica-jobs.txt, evidence/day16/04-arnica-code-findings.csv, +10 more
+Skipped evidence/day16/03-arnica-jobs.png (>256KB)
+Skipped evidence/day16/05-arnica-secrets-finding.png (binary)
+262 gitignored file(s) not reviewed.
+No coding-session context attached — pass --context-file (decisions + notes + recent_work; `-` reads stdin; summary is also accepted), or keep .qodo/session-context.json updated for automatic pickup.
+Reviewing UBayouski/tracenotes @ b349b8b51 — 50479B of local changes · deep depth (base cloned by the reviewer)
+Local comparison: no saved checkpoint is available. The server will recover history or report a full fallback.
+  trace d55e613646d612fb2c3f377fdaceb560

@@ -7,7 +7,8 @@ against one real ticket, T-028 (`journal/day-10.md`).
 
 ## Diagram
 
-Thick border: a step T-028 actually went through on Nov 13. Dashed: planned, not built.
+Thick border: a step T-028 actually went through on Nov 13, or, for the Qodo workflow (Day 14)
+and the Arnica scan (Day 16), a step that was actually run on that day. Dashed: planned, not built.
 Hexagon: a decision only the human makes. Plain: exists, not used by T-028.
 
 ```mermaid
@@ -61,6 +62,10 @@ flowchart TD
   HG --> HM
   HM --> MAIN["main"]:::taken
   MAIN --> AFTER["After the merge<br/>GitHub closes the issue<br/>Qodo updates its copy of the rules<br/>observed on Nov 13, verified by no gate"]:::taken
+  MAIN --> AR["Security scan, after the merge, by hand (Day 16)<br/>the human syncs the organization fork of main<br/>Arnica scans it: dependencies and licenses,<br/>secrets, infrastructure files, code"]:::taken
+  AR --> AF{{"Human reads the findings in Arnica's dashboard<br/>the agent investigates against the code and run logs<br/>human decides: fix, investigate further,<br/>or dismiss with a reason"}}:::taken
+  AF -- "fix: a new ticket" --> T
+  G4 -. "planned" .-> AP["PLANNED<br/>Arnica checks and comments on the pull request<br/>needs the repository itself in an organization"]:::planned
 
   classDef taken stroke-width:3px
   classDef planned stroke-dasharray: 5 5
@@ -79,6 +84,7 @@ flowchart TD
 | 5b. Pull request head, by procedure | Qodo's latest completed review is for the head commit (a skipped review counts only after Markdown-and-evidence-only commits) and no High or Medium finding is open. | The review session read with the Review Resolver skill: status, `commit_sha`, each finding's `attribution_status`. | Valid High or Medium: a fix, as in 5a. A dispute, a dismissal or a Low goes to the human, who either asks for a fix or settles it without a code change (a dismissal with a reason, a Low left as it is); the gate is then evaluated again. | The agent reports; the human decides. **Nothing in GitHub enforces 5b.** A pull request with an open High can be merged if the human ignores the gate report. |
 | Qodo workflow and approval guard (Day 14) | Qodo's complete review of the head has no finding of Medium or higher (every category and finding type), and no approval guard matches. The guard covers `.github/workflows/**` and, since Nov 20, `scripts/**` in this repository. | The `labeled` event on the pull request (`gh api repos/<repo>/issues/<n>/events`, actor `qodo-code-review[bot]`) and the PR Triage panel ("Reviewed on <sha>", findings open). PR Triage shows no workflow or guard entry of its own. | No label. A Medium+ finding goes through the fix loop of 5a and 5b; a guarded change waits for the human whatever the review says. | Qodo adds the label; the human reads every guarded change and still merges every pull request. The label is the workflow's verdict only: it says nothing about 5a, about a disputed or stale finding, or about the acceptance criteria. |
 | Merge | 5a green and the gate report says MET. | The gate report. | — | The human. |
+| Security scan (Day 16) | Arnica's four scans of `main` have completed (SCA/license, secrets, IaC, SAST), and every finding has a decision. Not a merge gate: it runs after the merge, on a copy. | Arnica's job list (status, time and count per scan) and findings table, saved under `evidence/`; `gh api` proof that the fork and `main` are the same commit and tree. | A finding is investigated against the code and the run logs before it is believed. A fix is a new ticket and goes through every gate above. | The human: fix, investigate further, or dismiss with a reason. |
 
 Who makes the fix commit on a pull request depends on the lane. In a session the agent commits
 and pushes on its own once the human has opened the pull request (`AGENTS.md`, process rules).
@@ -137,7 +143,34 @@ request body before its first review.
 The first review of #34 had a High and two Mediums, so its missing label proved nothing about
 the guard; only the clean re-review did. Evidence: `evidence/day14/`.
 
+## Checked against the Arnica scan and T-035 (Nov 23)
+
+The security scan, added on Day 16. Arnica connects GitHub organizations only, so the scan ran
+on `IoT-Forge-Labs/tracenotes`, a fork at the same commit and tree as `main` (`b349b8b`),
+scan-only, no policies. Predictions were written in `journal/day-16.md` before the repository
+was connected.
+
+| Scan | Completed (UTC) | Result | Predicted |
+|---|---|---|---|
+| SCA/License | 18:24:53 | 0 findings | 0 |
+| IaC | 18:25:26 | 0 findings | 0 |
+| Secrets | 18:25:26 | 1 Info, a made-up credential in a test, marked Invalid by Arnica | 0 real, a false alarm possible |
+| SAST | 18:25:39 | 4 Medium (one rule, the four checkout steps), 2 Low | 1 to 5, the checkout step most likely |
+
+The four Mediums became T-035: `actions/checkout` left the job's token in `.git/config`. The
+investigation (run logs, `evidence/day16/06-artipacked-investigation.txt`) showed no artifact
+upload anywhere, a read-only token in the two check workflows, and a write token in the two
+agent workflows that the agent action removes before it pushes with its own. The human chose to
+fix all four. Evidence: `evidence/day16/`.
+
 ## Known gaps
+
+- **The security scan sees a copy, after the merge, when a person syncs it.** Arnica does not
+  connect a personal account, so nothing scans a pull request and nothing rescans `main` on a
+  merge. Until the fork is synced, Arnica's dashboard describes an older commit.
+- **Label lane: the agent's own write token is in reach of ticket-written tests.** The agent
+  action puts its app token into the remote URL to push, and the agent then runs
+  `npm run check`. No scanner reported this; it was read from a run log on Day 16 (T-036).
 
 - **Label lane, before the commit: no Qodo review.** The bot has no Qodo credentials on
   purpose: every test it runs for a ticket could read them. T-029 (Day 16) plans a review of the

@@ -241,6 +241,12 @@ human, and one line: `Quality gate: MET` or `Quality gate: NOT MET`, with the re
   is the early warning with a readable message; it fails closed on any other spelling of the
   `uses` key. Bumping a pin is its own pull request that a human reads: the Qodo approval guard
   on `.github/workflows/**` keeps such a pull request away from the "Qodo approved" label (T-034).
+- Every `actions/checkout` step sets `persist-credentials: false`, so the job's token is not left
+  in `.git/config` for the steps that follow. No job here runs git with that credential: the
+  agent action pushes with its own token. `tests/checkout-credentials.test.ts` fails closed on a
+  checkout step in any other form (T-035, found by Arnica's scan on Day 16). The test reads
+  `.github/workflows/` only: a composite action under `.github/actions/` that checks out code
+  needs the same option and its own check.
 - Changes to `scripts/` go to a person too. The scripts are the logic behind the checks
   (`ticket-link`, the label-lane guard, source hygiene, action pins), so the Qodo approval guard
   covers `scripts/**` as well (Nov 20): such a pull request never gets the "Qodo approved" label,

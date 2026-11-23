@@ -1,0 +1,17 @@
+$ gh api repos/UBayouski/tracenotes --jq '[.full_name, .owner.type, .visibility, .default_branch, .fork] | @tsv'
+UBayouski/tracenotes	User	public	main	false
+$ gh api repos/UBayouski/tracenotes/commits/main --jq '[.sha, .commit.tree.sha, .commit.committer.date] | @tsv'
+b349b8b51f646db1fba59cf48ebb9f9fa9dc686c	fbc2bdd44b97a58ae3377bc3c25f5566517df79e	2026-11-23T17:31:56Z
+$ gh api repos/IoT-Forge-Labs/tracenotes --jq '[.full_name, .owner.type, .visibility, .default_branch, .fork, .parent.full_name] | @tsv'
+IoT-Forge-Labs/tracenotes	Organization	public	main	true	UBayouski/tracenotes
+$ gh api repos/IoT-Forge-Labs/tracenotes/commits/main --jq '[.sha, .commit.tree.sha, .commit.committer.date] | @tsv'
+b349b8b51f646db1fba59cf48ebb9f9fa9dc686c	fbc2bdd44b97a58ae3377bc3c25f5566517df79e	2026-11-23T17:31:56Z
+$ gh api repos/IoT-Forge-Labs/tracenotes/branches --jq '[.[].name] | join(" ")'
+main
+$ gh api repos/IoT-Forge-Labs/tracenotes/actions/runs --jq '.total_count'
+0
+$ gh api repos/IoT-Forge-Labs/tracenotes/actions/secrets --jq '.total_count'
+0
+$ gh api orgs/IoT-Forge-Labs --jq '[.login, .plan.name, .public_repos] | @tsv'
+IoT-Forge-Labs	free	1
+$ gh api orgs/IoT-Forge-Labs/installations --jq '.installations[] | [.app_slug, .repository_selection, .created_at] | @tsv'
