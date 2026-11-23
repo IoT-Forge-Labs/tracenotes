@@ -199,6 +199,31 @@ describe('auditNotes (T-032)', () => {
     assert.deepEqual(failed(input), ['markdown-links']);
   });
 
+  // PR 38 review, finding af1da7c7: the base must not run across an earlier unescaped `](`, or
+  // the entry's own link is swallowed and reported as missing, which the old pattern did not do.
+  test('a stray `](` before the entry\'s own link does not hide that link (finding af1da7c7)', async () => {
+    const input = await inputsFor(commits);
+    const own = `](${repoUrl}/commit/${sha('b')})`;
+    assert.ok(input.notesMarkdown.includes(own), input.notesMarkdown);
+    input.notesMarkdown = input.notesMarkdown.replace(own, `](https://example.com/a${own}`);
+    const links = auditNotes(input).checks.find(c => c.id === 'markdown-links')!;
+    assert.equal(links.ok, false);
+    assert.match(links.detail, /entry not linked: none;/);
+    assert.match(links.detail, /not the expected line[^:]*: bbbbbbb$/);
+  });
+
+  // PR 38 review, finding 2d187faa: each `](` started a scan to the end of the line, so a long
+  // line of them cost time in the square of its length. The limit is far above a linear scan.
+  test('a long line of unclosed `](` is scanned in linear time (finding 2d187faa)', async () => {
+    const input = await inputsFor(commits);
+    input.notesMarkdown = input.notesMarkdown.replace('\n- ', `\n- ${'](a'.repeat(60000)}\n- `);
+    const started = performance.now();
+    const result = failed(input);
+    const elapsed = performance.now() - started;
+    assert.deepEqual(result, ['markdown-links']);
+    assert.ok(elapsed < 1000, `took ${Math.round(elapsed)} ms`);
+  });
+
   // Qodo local review finding d457935f: skip lines carry short SHAs, which two merges can share.
   test('two merges with the same short SHA still pass check-agrees (finding d457935f)', async () => {
     const twin = `${'c'.repeat(7)}${'d'.repeat(33)}`;

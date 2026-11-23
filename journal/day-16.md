@@ -290,6 +290,35 @@ changed). Deep reviews completed: 2, the last one on the final tree without the 
 
 **Quality gate: NOT MET** until the human decides e8894004.
 
+## Pull request 38
+
+The human made the first commit (`8e15dc9`, with this journal in it) and opened
+https://github.com/UBayouski/tracenotes/pull/38 (`Closes #37`) without ruling on e8894004; the
+agent took that as the go-ahead, as on pull request 36. The finding did not come back.
+
+| Head | Checks | Qodo review | Label |
+|---|---|---|---|
+| `8e15dc9` (human) | superseded by the next push | run 2120538, aborted | |
+| `6ab70d6` (agent: `BACKLOG.md` row `done (PR 38)`) | `check` on Linux and Windows, `ticket-link`: pass | run 2120562 (lite): completed for the head, `review_complete: true`, no High or Medium, 2 Lows | "Qodo approved" added by `qodo-code-review[bot]` at 20:05:50 UTC (the change is outside the approval guard) |
+
+Gate MET at `6ab70d6`. The two Lows were both about the pattern this ticket introduced:
+
+- 2d187faa, Performance: every `](` started a scan to the end of the line, so a long line of
+  them cost time in the square of its length. The expression it replaced did not.
+- af1da7c7, Correctness: the base could run across an earlier unescaped `](`, so on a
+  hand-edited line the entry's own link was swallowed and reported as "entry not linked". Same
+  verdict as before, different detail text. Qodo's local review 2 had said the same in a note.
+
+Decision (human): fix both. One change: the base stops at `]` and `(` as well as at `)` and
+whitespace, in both link patterns. Red first (`evidence/day16/pr38/tests-red.txt`: the detail
+text, and 1124 ms for a line of 30 000 unclosed `](`; the test now uses 60 000 and takes about a
+millisecond). 387 tests. The original script (`8f88b60`) and the new one still give
+byte-identical reports on the three saved input sets (`evidence/day16/pr38/audit-old-vs-new.txt`).
+
+The fix for a scanner's "non literal regexp" finding had put a slow path into the fixed
+expression that replaced it; the next reviewer found it. The review of the head that carries
+this section is read after the push and recorded on `main` with the merge note.
+
 ## Predictions against the result
 
 | Job | Predicted | Observed |

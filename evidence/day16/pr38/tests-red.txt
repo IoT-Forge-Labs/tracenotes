@@ -1,0 +1,78 @@
+▶ auditNotes (T-032)
+  ✔ a clean range passes every check (criteria 2, 3) (4.9824ms)
+  ✔ a commit in the range but not in the notes fails exactly-once and counts, naming it (0.8465ms)
+  ✔ a commit in the notes but not in the range fails exactly-once and json-links (0.6509ms)
+  ✔ a commit listed twice in the range fails exactly-once (0.5738ms)
+  ✔ a Markdown entry without its commit link fails markdown-links (0.383ms)
+  ✔ a JSON entry with a wrong link fails json-links (0.3995ms)
+  ✔ a malformed record fails exactly-once and counts (0.7614ms)
+  ✔ two JSON entries with swapped sources fail json-links (finding 44bb76a4) (0.3526ms)
+  ✔ two Markdown lines with swapped links fail markdown-links (finding 7f66a5e3) (0.3319ms)
+  ✔ a JSON entry with another entry's subject fails json-links (finding 7dc5829e) (0.3976ms)
+  ✔ a Markdown line with another entry's subject fails markdown-links (finding 7dc5829e) (0.4206ms)
+  ✔ a JSON entry moved to another section, same order, fails json-links (finding f9b538b4) (0.3009ms)
+  ✔ a Markdown entry under the wrong heading fails markdown-links (finding f9b538b4) (0.2558ms)
+  ✔ commit-link text inside a subject does not fail a clean audit (finding 5638c83e) (0.333ms)
+  ✔ check totals that do not add up fail counts (finding 4f944bf8) (0.4585ms)
+  ✔ a skip count offset by extra passes fails check-agrees (finding 624dd0de) (0.7854ms)
+  ✔ an entry line with a second commit link to another repository fails markdown-links (finding 4b2ac78e) (0.3143ms)
+  ✔ a link whose base differs only at a dot of the repository URL is not the entry's own (T-037, criterion 2) (0.2407ms)
+  ✖ a stray `](` before the entry's own link does not hide that link (finding af1da7c7) (0.6516ms)
+  ✖ a long line of unclosed `](` is scanned in linear time (finding 2d187faa) (1124.5935ms)
+  ✔ two merges with the same short SHA still pass check-agrees (finding d457935f) (0.6463ms)
+  ✔ a check total that disagrees fails counts; a missing skip line fails check-agrees (0.5089ms)
+  ✔ extra text on a Markdown line, or a wrong PR link, fails (finding 633aace6) (1.1608ms)
+  ✔ a lost or changed breaking-change note fails (finding 8f818660) (0.8002ms)
+  ✔ a non-merge commit in ignored fails exactly-once, even with consistent outputs (finding 234d5143) (3.2406ms)
+  ✔ a Markdown footer with a wrong count fails counts (finding be79ef1c) (0.294ms)
+  ✔ a rejected repository URL is not quoted in the error (finding e1492647) (0.3668ms)
+  ✔ unreadable input throws RangeError, nothing is guessed (criterion 4) (0.4485ms)
+✖ auditNotes (T-032) (1147.1365ms)
+▶ release-notes-audit entry as a child process (criterion 5)
+  ✔ PASS: exit 0, one line per check and the verdict (81.8794ms)
+  ✔ FAIL: exit 1 and the count of failed checks (75.871ms)
+  ✔ bad input or usage: exit 2, one error line, nothing on stdout (224.1658ms)
+  ✔ an error message with a bidi override or a line separator stays one escaped line (finding 2a84cc4a) (96.6464ms)
+  ✔ a rejected repository URL is not printed by the entry either (finding e1492647) (91.6289ms)
+✔ release-notes-audit entry as a child process (criterion 5) (572.69ms)
+ℹ tests 33
+ℹ suites 2
+ℹ pass 31
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1825.8313
+
+✖ failing tests:
+
+test at tests\release-notes-audit.test.ts:204:3
+✖ a stray `](` before the entry's own link does not hide that link (finding af1da7c7) (0.6516ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /entry not linked: none;/. Input:
+  
+  "4 entry lines (shown 4); lines without exactly one commit link: 1; entry not linked: bbbbbbb; unexpected link: none; not in group's order: none; not the expected line (heading, scope, subject, links, breaking notes): none"
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Qodo/dark_factory/tests/release-notes-audit.test.ts:211:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: "4 entry lines (shown 4); lines without exactly one commit link: 1; entry not linked: bbbbbbb; unexpected link: none; not in group's order: none; not the expected line (heading, scope, subject, links, breaking notes): none",
+    expected: /entry not linked: none;/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests\release-notes-audit.test.ts:217:3
+✖ a long line of unclosed `](` is scanned in linear time (finding 2d187faa) (1124.5935ms)
+  AssertionError [ERR_ASSERTION]: took 1124 ms
+      at TestContext.<anonymous> (file:///D:/Projects/Qodo/dark_factory/tests/release-notes-audit.test.ts:224:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Suite.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }
