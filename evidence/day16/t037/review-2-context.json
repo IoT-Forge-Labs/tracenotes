@@ -1,0 +1,11 @@
+{
+  "recent_work": [
+    "After local review 1: a comment in audit.ts says fullShaLink and anyCommitLink share their start and change together (reviewer comment). No code path changed."
+  ],
+  "decisions": [
+    "The BACKLOG row for T-037 says planned on purpose: the pull request number does not exist yet; the row is set to done (PR n) in the second commit on the pull request, as on PRs 24, 33, 34 and 36. The human accepted this handling on PR 36 (finding d6f052b6).",
+    "src/config.ts line 30 (user-written ignore patterns) is not changed; the human dismisses that Arnica finding as intentional.",
+    "e8894004 (saved audit lacks its input stream): disputed by the agent as a false positive. evidence/day16/t037/audit-inputs/stream.bin exists; review 1 skipped it as binary and so could not see it. Waiting for the human to decide. That directory is excluded from this review by path so that coverage can be complete."
+  ],
+  "notes": "evidence/day16/t037/audit-inputs holds a git log stream of five public commits used for the before/after comparison."
+}

@@ -232,8 +232,17 @@ export function auditNotes(input: AuditInput): AuditResult {
   });
 
   // markdown-links: one "- " line per shown entry, each with exactly one commit link of its own.
-  const base = input.repoUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const linkRe = new RegExp(`(?<!\\\\)\\]\\(${base}/commit/([0-9a-f]{40})\\)`, 'g');
+  // A fixed pattern for any commit link with a full SHA; the link is this repository's when its
+  // base equals the repository URL as text (T-037: no expression is built from input). A URL
+  // that passed checkRepoUrl holds no bracket, parenthesis or whitespace, so the base is
+  // captured whole. The base stops at `]` and `(` as well as at `)` and whitespace: it cannot
+  // run across a later `](`, which keeps the scan linear in the line's length and keeps a
+  // stray `](` from swallowing the link after it (PR 38 review, findings 2d187faa, af1da7c7).
+  // `anyCommitLink` below starts the same way: a change to that part is made in both. They are
+  // two literals on purpose.
+  const fullShaLink = /(?<!\\)\]\(([^()\]\s]*)\/commit\/([0-9a-f]{40})\)/g;
+  const ownShas = (line: string) =>
+    [...line.matchAll(fullShaLink)].filter(m => m[1] === input.repoUrl).map(m => m[2]!);
   // render backslash-escapes Markdown characters and adds nothing else, so removing the escapes
   // gives the text back. Each entry line is read with the heading it sits under.
   const unescape = (text: string) => text.replace(/\\(.)/g, '$1');
@@ -247,11 +256,11 @@ export function auditNotes(input: AuditInput): AuditResult {
     else if (line.startsWith('  ') && placedLines.length > 0) placedLines.at(-1)!.notes.push(line);
   }
   const entryLines = placedLines.map(p => p.line);
-  const linked = entryLines.map(line => [...line.matchAll(linkRe)].map(m => m[1]!));
+  const linked = entryLines.map(ownShas);
   // Every commit link on the line counts, whatever its base (finding 4b2ac78e): a correct link
   // plus a second one to another repository is two links. A `](` whose `]` is escaped is
   // subject text, not a link (render escapes brackets in subjects; finding 5638c83e).
-  const anyCommitLink = /(?<!\\)\]\([^)\s]*\/commit\/[0-9a-f]{7,40}\)/g;
+  const anyCommitLink = /(?<!\\)\]\([^()\]\s]*\/commit\/[0-9a-f]{7,40}\)/g;
   const badLines = entryLines.filter((line, k) => linked[k]!.length !== 1 || [...line.matchAll(anyCommitLink)].length !== 1).length;
   const mdShas = linked.filter(shas => shas.length === 1).map(shas => shas[0]!);
   const mdMissing = difference(entryShas, new Set(mdShas));

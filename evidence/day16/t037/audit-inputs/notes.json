@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "title": "Unreleased",
+  "sections": [
+    {
+      "title": "Bug fixes",
+      "entries": [
+        {
+          "scope": "ci",
+          "subject": "do not keep the job token after checkout (T-035)",
+          "breakingNotes": [],
+          "source": {
+            "sha": "fae957aa4b6d0daf6c4d38aca1f3f440ef722589",
+            "shortSha": "fae957a",
+            "commitUrl": "https://github.com/UBayouski/tracenotes/commit/fae957aa4b6d0daf6c4d38aca1f3f440ef722589",
+            "prNumber": null,
+            "prUrl": null
+          }
+        }
+      ]
+    },
+    {
+      "title": "docs",
+      "entries": [
+        {
+          "scope": "day-16",
+          "subject": "journal and evidence for PR 36",
+          "breakingNotes": [],
+          "source": {
+            "sha": "99aa0a43bac1c02f2f103596e8566b7a4d56221d",
+            "shortSha": "99aa0a4",
+            "commitUrl": "https://github.com/UBayouski/tracenotes/commit/99aa0a43bac1c02f2f103596e8566b7a4d56221d",
+            "prNumber": null,
+            "prUrl": null
+          }
+        },
+        {
+          "scope": "backlog",
+          "subject": "T-035 done (PR 36)",
+          "breakingNotes": [],
+          "source": {
+            "sha": "44fe418085a075be0b66b8bbf63686530297a19a",
+            "shortSha": "44fe418",
+            "commitUrl": "https://github.com/UBayouski/tracenotes/commit/44fe418085a075be0b66b8bbf63686530297a19a",
+            "prNumber": null,
+            "prUrl": null
+          }
+        }
+      ]
+    },
+    {
+      "title": "Unclassified",
+      "entries": [
+        {
+          "scope": null,
+          "subject": "Arnica report",
+          "breakingNotes": [],
+          "source": {
+            "sha": "8f88b60d25e4e2aab258bc9212f6f4f18426b59e",
+            "shortSha": "8f88b60",
+            "commitUrl": "https://github.com/UBayouski/tracenotes/commit/8f88b60d25e4e2aab258bc9212f6f4f18426b59e",
+            "prNumber": null,
+            "prUrl": null
+          }
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "shown": 4,
+    "total": 5,
+    "ignored": 1,
+    "malformed": 0
+  }
+}

@@ -1,0 +1,17 @@
+8f88b60d25e4e2aab258bc9212f6f4f18426b59eUladzislau Bayouski2026-11-23T11:47:26-08:00Arnica report
+
+1a6f86529dcf93ea5dd643c3e611e1f369badbd2UBayouski2026-11-23T11:15:09-08:00Merge pull request #36 from UBayouski/t-035-checkout-credentials
+
+fix(ci): do not keep the job token after checkout (T-035)
+99aa0a43bac1c02f2f103596e8566b7a4d56221dUladzislau Bayouski2026-11-23T11:10:16-08:00docs(day-16): journal and evidence for PR 36
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+
+44fe418085a075be0b66b8bbf63686530297a19aUladzislau Bayouski2026-11-23T11:05:27-08:00docs(backlog): T-035 done (PR 36)
+
+Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+
+fae957aa4b6d0daf6c4d38aca1f3f440ef722589Uladzislau Bayouski2026-11-23T11:04:14-08:00  fix(ci): do not keep the job token after checkout (T-035)
+
+  Co-Authored-By: Claude Fable 5.2 <noreply@anthropic.com>
+
