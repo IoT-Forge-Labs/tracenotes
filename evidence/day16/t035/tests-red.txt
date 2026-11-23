@@ -1,0 +1,56 @@
+▶ persistedCredentials
+  ✔ a step that sets the option passes, as a list item or after another key (criterion 2) (1.0961ms)
+  ✔ CRLF line endings are framing, not content (criterion 2) (0.1261ms)
+  ✔ a step with no `with:` block is reported with its file and line (criterion 2) (0.2441ms)
+  ✔ a `with:` block without the option is reported (criterion 2) (0.5941ms)
+  ✔ the option of the next step does not count for this one (criterion 2) (0.103ms)
+  ✔ any value other than a bare false is reported (criterion 2) (0.1526ms)
+  ✔ the option given twice, or nested under another key, is reported (criterion 2) (0.0814ms)
+  ✔ `with:` at another column, a flow mapping or a key in between is reported (criterion 2) (0.0981ms)
+  ✔ every other mention of the action is reported as unsupported (criterion 2) (0.1261ms)
+  ✔ a file without a checkout step has no problems (criterion 2) (0.1011ms)
+✔ persistedCredentials (3.6175ms)
+▶ the workflows of this repository
+  ✖ every checkout step sets persist-credentials: false (criterion 1) (1.4822ms)
+✖ the workflows of this repository (1.6144ms)
+ℹ tests 11
+ℹ suites 2
+ℹ pass 10
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 103.3698
+
+✖ failing tests:
+
+test at tests\checkout-credentials.test.ts:106:3
+✖ every checkout step sets persist-credentials: false (criterion 1) (1.4822ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   'agent-fix.yml:53: `with:` must hold `persist-credentials: false` exactly once, on a line of its own',
+  +   'agent-ticket.yml:50: `with:` must hold `persist-credentials: false` exactly once, on a line of its own',
+  +   'check.yml:40: the line after the step must be its `with:` block, holding `persist-credentials: false`',
+  +   'ticket-link.yml:45: `with:` must hold `persist-credentials: false` exactly once, on a line of its own'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///D:/Projects/Qodo/dark_factory/tests/checkout-credentials.test.ts:108:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at node:internal/test_runner/test:1903:71
+      at node:internal/per_context/primordials:504:82
+      at new Promise (<anonymous>)
+      at new SafePromise (node:internal/per_context/primordials:478:3)
+      at node:internal/per_context/primordials:504:9
+      at Array.map (<anonymous>) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'agent-fix.yml:53: `with:` must hold `persist-credentials: false` exactly once, on a line of its own', 'agent-ticket.yml:50: `with:` must hold `persist-credentials: false` exactly once, on a line of its own', 'check.yml:40: the line after the step must be its `with:` block, holding `persist-credentials: false`', 'ticket-link.yml:45: `with:` must hold `persist-credentials: false` exactly once, on a line of its own' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

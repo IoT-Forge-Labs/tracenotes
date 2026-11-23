@@ -1,0 +1,9 @@
+{
+  "recent_work": [
+    "Fix round 1 after local review 2. ea881e83: every line of a checkout step's with: block must now be `key: plain value` at one indentation (no comment, quote, blank line, block scalar or flow value), tests added red first. 5dcf1618: a line with the word uses and a quote or backslash is reported whatever it spells, test added red first."
+  ],
+  "decisions": [
+    "a73703d7 (BACKLOG row says planned): not changed before the commit. The pull request number does not exist until the pull request is opened; the row is set to done (PR n) in the second commit on the pull request, as on PRs 24, 33 and 34. ticket-link is red on the first commit by design. Waiting for the human to confirm this handling."
+  ],
+  "notes": "PNG screenshots under evidence/day16 are excluded from this review so that coverage can be complete; they are images of Arnica's dashboard."
+}
